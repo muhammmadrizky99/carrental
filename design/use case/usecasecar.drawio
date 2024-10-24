@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36" version="24.8.1">
   <diagram name="Page-1" id="oVtiOTELwH6GT3NF6cck">
-    <mxGraphModel dx="1235" dy="655" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1615" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -100,14 +100,17 @@
             <mxPoint x="730" y="440" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="F8tH8v7KfYxNln84B1HV-1" value="Mencetak&lt;div&gt;laporan&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="F8tH8v7KfYxNln84B1HV-1" value="Mencetak&lt;div&gt;laporan&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="305" y="710" width="110" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="F8tH8v7KfYxNln84B1HV-4" value="" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="JSDxDcI4ML6gQsG7tVlX-3" target="F8tH8v7KfYxNln84B1HV-1">
+        <mxCell id="F8tH8v7KfYxNln84B1HV-4" value="" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="JSDxDcI4ML6gQsG7tVlX-3" target="F8tH8v7KfYxNln84B1HV-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="110" y="640" as="sourcePoint" />
             <mxPoint x="430" y="740" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="l4TKp2GNaoeZBegueA18-1" value="" style="swimlane;startSize=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="130" width="500" height="700" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
