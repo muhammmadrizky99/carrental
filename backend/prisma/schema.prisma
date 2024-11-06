@@ -18,3 +18,25 @@ model users {
   email    String @unique @db.VarChar(255)  
   password String @db.VarChar(255)
 }
+model mobil {
+  id Int @id @default(autoincrement())
+  namaMobil String
+  gambar String @db.VarChar(255)
+  deskripsi String 
+  tipe String
+  merek String
+  model String
+  tahun Int 
+  transmisi String
+  kapasitasMesin Int 
+  kapasitasKursi Int 
+  jumlahTas Int 
+  jumlahPintu Int 
+  warna String
+  fiturLainnya String
+  ac Boolean 
+  harga Float 
+  minimum Int 
+  maximum Int 
+
+}

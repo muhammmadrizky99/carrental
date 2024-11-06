@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import prm from '../src/config/database'; // Koneksi database menggunakan Prisma
 import router from '../src/routes/auth'; // Router auth
+import mobilRouter from './routes/mobil'; //router mobil
 
 const app = express();
 const PORT = process.env.PORT || 2500;
@@ -39,6 +40,8 @@ app.get("/test", async (req: Request, res: Response) => {
 
 // Using auth router
 app.use("/api", router);
+app.use("/api", mobilRouter);
+
 
 // Starting the server
 app.listen(PORT, () => {
