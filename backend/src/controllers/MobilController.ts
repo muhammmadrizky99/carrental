@@ -1,12 +1,11 @@
 // src/controllers/MobilController.ts
 
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import prisma from '../config/database';
 
 export const MobilController = async (req: Request, res: Response) => {
     try {
         const {
-            gambar,
             namaMobil,
             deskripsi,
             tipe,
@@ -34,24 +33,24 @@ export const MobilController = async (req: Request, res: Response) => {
         // Buat entri mobil baru di database
         const mobilBaru = await prisma.mobil.create({
             data: {
-                gambar,
+                gambar:`http://localhost:2500/${req.file?.filename}`,
                 deskripsi,
                 tipe,
                 namaMobil,
                 merek,
                 model,
-                tahun,
+                tahun: Number(tahun),
                 transmisi,
-                kapasitasMesin,
-                kapasitasKursi,
-                jumlahTas,
-                jumlahPintu,
+                kapasitasMesin: Number(kapasitasMesin),
+                kapasitasKursi: Number(kapasitasKursi),
+                jumlahTas: Number(jumlahTas),
+                jumlahPintu: Number(jumlahPintu),
                 warna,
                 fiturLainnya,
-                ac,
-                harga,
-                minimum,
-                maximum
+                ac: ac === "true" ? true : false,
+                harga: Number(harga),
+                minimum: Number(minimum),
+                maximum: Number(maximum )
             }
         });
 
@@ -67,3 +66,13 @@ export const MobilController = async (req: Request, res: Response) => {
         });
     }
 };
+
+//mengambil data dari api
+export const semuaMobil = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const mobil = await prisma.mobil.findMany();
+        return res.status(200).json({"data": mobil})
+    }catch(error){
+        return res.status(500).json({"errors": "Internal server error: "+ error})
+    }
+}

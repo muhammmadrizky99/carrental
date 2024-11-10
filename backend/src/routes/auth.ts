@@ -13,6 +13,6 @@ router.post('/login', LoginController);
 //route register
 router.post('/register', RegisterController);
 
-router.post('/tambah-mobil', MobilController);
+// router.post('/tambah-mobil', MobilController);
 
 export default router;

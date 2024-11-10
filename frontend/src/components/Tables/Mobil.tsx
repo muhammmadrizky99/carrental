@@ -1,40 +1,49 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import axios from "axios";
 // import Buttons from "@/app/ui/buttons/page";
 
 const TableTwo = () => {
-  const [productData, setProductData] = useState<Product[]>([
-    {
-      filter: (arg0: (_: any, i: any) => boolean) => true,
-      gambar: null,
-      namaMobil: "",
-      deskripsi: "",
-      tipe: "",
-      merek: "",
-      model: "",
-      tahun: new Date().getFullYear(),
-      transmisi: "",
-      kapasitasMesin: 0,
-      kapasitasKursi: 0,
-      jumlahTas: 0,
-      jumlahPintu: 0,
-      warna: "",
-      fiturLainnya: "",
-      ac: false,
-      harga: 0,
-      minimum: 0,
-      maximum: 0,
-    },
-  ]);
+  // const [productData, setProductData] = useState<Product[]>([
+  //   {
+  //     filter: (arg0: (_: any, i: any) => boolean) => true,
+  //     gambar: null,
+  //     namaMobil: "",
+  //     deskripsi: "",
+  //     tipe: "",
+  //     merek: "",
+  //     model: "",
+  //     tahun: new Date().getFullYear(),
+  //     transmisi: "",
+  //     kapasitasMesin: 0,
+  //     kapasitasKursi: 0,
+  //     jumlahTas: 0,
+  //     jumlahPintu: 0,
+  //     warna: "",
+  //     fiturLainnya: "",
+  //     ac: false,
+  //     harga: 0,
+  //     minimum: 0,
+  //     maximum: 0,
+  //   },
+  // ]);
 
   const [form, setForm] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [ac, setAc] = useState({ ac: true });
+
+  const handleAc = (e: any) => {
+    const value = e.target.value
+    setAc({
+      ...ac,
+      ac: value === "true"
+    })
+  }
 
   const [newProduct, setNewProduct] = useState<Product>({
     filter: () => true,
@@ -62,6 +71,7 @@ const TableTwo = () => {
   //Fungsi untuk menangani perubahan pada input form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log("Input changed:", name, value);
     setNewProduct({
       ...newProduct,
       [name]: name === "harga" || name === "tahun" ? parseInt(value) : value,
@@ -85,12 +95,15 @@ const TableTwo = () => {
     }
   };
 
+
+
   //tambah
   const handleAddProduct = async () => {
     // setProductData([...productData, newProduct]);
     // setModalOpen(false);
     try {
-      const response = axios.post("http://localhost:2500/mobil", {
+      console.log("Sending product data: ", newProduct);
+      const response = axios.post("http://localhost:2500/api/mobil", {
         gambar: newProduct.gambar,
         namaMobil: newProduct.namaMobil,
         deskripsi: newProduct.deskripsi,
@@ -105,12 +118,14 @@ const TableTwo = () => {
         jumlahPintu: newProduct.jumlahPintu,
         warna: newProduct.warna,
         fiturLainnya: newProduct.fiturLainnya,
-        ac: newProduct.ac,
+        ac: ac.ac,
         harga: newProduct.harga,
         minimum: newProduct.minimum,
         maximum: newProduct.maximum
-      })
+      }, { "headers": { "Content-Type": "multipart/form-data" } });
+      console.log("Response after adding product:", response);
     } catch (error) {
+      console.log("Error adding product", error);
 
     }
     resetForm();
@@ -122,15 +137,17 @@ const TableTwo = () => {
   const handleEditProduct = (index: number) => {
     setEditMode(true);
     setEditIndex(index);
-    setNewProduct(productData[index]);
+    // setNewProduct(productData[index]);
     setModalOpen(true);
   };
 
   const handleSaveEdit = () => {
     if (editIndex !== null) {
-      const updatedProducts = [...productData];
-      updatedProducts[editIndex] = newProduct;
-      setProductData(updatedProducts);
+      console.log("Saving edited product at index:", editIndex);  // Debugging index edit
+    console.log("New product data:", newProduct);
+      // const updatedProducts = [...productData];
+      // updatedProducts[editIndex] = newProduct;
+      // setProductData(updatedProducts);
     }
     setModalOpen(false);
     setEditMode(false);
@@ -140,7 +157,7 @@ const TableTwo = () => {
   //hapus
   const handleDeleteProduct = (index: number) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
-      setProductData(productData.filter((_, i) => i !== index));
+      // setProductData(productData.filter((_, i) => i !== index));
     }
   };
 
@@ -170,6 +187,25 @@ const TableTwo = () => {
     });
     setEditIndex(null);
   };
+
+
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const teamComplete = async () => {
+      try {
+        const response = await axios.get('http://localhost:2500/api/mobil');
+        setData(response.data.data);
+        console.log(response.data);
+
+      } catch (error: any) {
+        setError(error.message);
+        console.log("Error fetching data: ", error);
+      }
+    };
+    teamComplete();
+  }, []);
 
 
 
@@ -210,7 +246,7 @@ const TableTwo = () => {
         </div>
       </div>
 
-      {productData.map((product, key) => (
+      {data.map((product, key) => (
         <div
           className="grid grid-cols-6 border-t border-stroke px-4 py-4.5 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5"
           key={key}
@@ -218,12 +254,13 @@ const TableTwo = () => {
           <div className="col-span-2 flex items-center">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="h-12.5 w-15 rounded-md">
-                {imageURL ? (
+                {product.gambar ? (
                   <Image
-                    src={imageURL}
+                    src={product.gambar}
                     width={60}
                     height={50}
                     alt="Product"
+                    unoptimized
                   />
                 ) : (
                   <p>Gambar tidak tersedia</p>
@@ -281,7 +318,7 @@ const TableTwo = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg mx-4 md:mx-auto max-h-screen overflow-y-auto">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-4xl mx-4 md:mx-auto max-h-screen overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-center">Tambah Mobil</h2>
 
             <div className="mb-4">
@@ -305,213 +342,213 @@ const TableTwo = () => {
                 />
               </div>
             )}
-            <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-gray-700">Nama Mobil</label>
-              <input
-                type="text"
-                name="nama"
-                value={newProduct.namaMobil}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Deskripsi</label>
-              <input
-                type="text"
-                name="deskripsi"
-                value={newProduct.deskripsi}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Tipe</label>
-              <input
-                type="text"
-                name="tipe"
-                value={newProduct.tipe}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Merek</label>
-              <input
-                type="text"
-                name="merek"
-                value={newProduct.merek}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Model</label>
-              <input
-                type="text"
-                name="model"
-                value={newProduct.model}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-gray-700">Tahun</label>
-              <input
-                type="number"
-                name="tahun"
-                value={newProduct.tahun}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Transmisi</label>
-              <input
-                type="text"
-                name="transmisi"
-                value={newProduct.transmisi}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Kapasitas Mesin</label>
-              <input
-                type="number"
-                name="kapasitasMesin"
-                value={newProduct.kapasitasMesin}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Kapasitas Kursi</label>
-              <input
-                type="number"
-                name="kapasitasKursi"
-                value={newProduct.kapasitasKursi}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Jumlah Tas</label>
-              <input
-                type="number"
-                name="jumlahTas"
-                value={newProduct.jumlahTas}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Jumlah Pintu</label>
-              <input
-                type="number"
-                name="jumlahPintu"
-                value={newProduct.jumlahPintu}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Warna</label>
-              <input
-                type="text"
-                name="warna"
-                value={newProduct.warna}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Fitur Lainnya</label>
-              <input
-                type="text"
-                name="fiturLainnya"
-                value={newProduct.fiturLainnya}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            {/* fitur lainnya */}
-
-            <div >
-              <label className="block text-gray-700">AC</label>
-              <div className="flex items-center mt-2 space-x-4">
-                <label >
-                  <input
-                    type="radio"
-                    name="ac"
-                    value="true"
-                    checked={newProduct.ac === true}
-                    onChange={handleInputChange}
-                    className="mr-1"
-                  />
-                  Tersedia
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="ac"
-                    value="false"
-                    checked={newProduct.ac === false}
-                    onChange={handleInputChange}
-                    className="mr-1"
-                  />
-                  Tidak Tersedia
-                </label>
+            <div className="grid grid-cols-1  gap-4">
+              <div>
+                <label className="block text-gray-700">Nama Mobil</label>
+                <input
+                  type="text"
+                  name="namaMobil"
+                  value={newProduct.namaMobil}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
               </div>
-            </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Deskripsi</label>
+                <input
+                  type="text"
+                  name="deskripsi"
+                  value={newProduct.deskripsi}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Tipe</label>
+                <input
+                  type="text"
+                  name="tipe"
+                  value={newProduct.tipe}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Merek</label>
+                <input
+                  type="text"
+                  name="merek"
+                  value={newProduct.merek}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Model</label>
+                <input
+                  type="text"
+                  name="model"
+                  value={newProduct.model}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
 
-            <div >
-              <label className="block text-gray-700">Harga</label>
-              <input
-                type="number"
-                name="harga"
-                value={newProduct.harga}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700">Minimum</label>
-              <input
-                type="number"
-                name="minimum"
-                value={newProduct.minimum}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div >
-              <label className="block text-gray-700">Maximum</label>
-              <input
-                type="number"
-                name="maximum"
-                value={newProduct.maximum}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded"
-              />
-            </div>
+              <div>
+                <label className="block text-gray-700">Tahun</label>
+                <input
+                  type="number"
+                  name="tahun"
+                  value={newProduct.tahun}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Transmisi</label>
+                <input
+                  type="text"
+                  name="transmisi"
+                  value={newProduct.transmisi}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Kapasitas Mesin</label>
+                <input
+                  type="number"
+                  name="kapasitasMesin"
+                  value={newProduct.kapasitasMesin}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Kapasitas Kursi</label>
+                <input
+                  type="number"
+                  name="kapasitasKursi"
+                  value={newProduct.kapasitasKursi}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Jumlah Tas</label>
+                <input
+                  type="number"
+                  name="jumlahTas"
+                  value={newProduct.jumlahTas}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Jumlah Pintu</label>
+                <input
+                  type="number"
+                  name="jumlahPintu"
+                  value={newProduct.jumlahPintu}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Warna</label>
+                <input
+                  type="text"
+                  name="warna"
+                  value={newProduct.warna}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Fitur Lainnya</label>
+                <input
+                  type="text"
+                  name="fiturLainnya"
+                  value={newProduct.fiturLainnya}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              {/* fitur lainnya */}
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                Batal
-              </button>
-              <button
-                onClick={isEditMode ? handleSaveEdit : handleAddProduct}
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition"
-              >
-                {isEditMode ? "Simpan" : "Tambah"}
-              </button>
-            </div>
+              <div >
+                <label className="block text-gray-700">AC</label>
+                <div className="flex items-center mt-2 space-x-4">
+                  <label >
+                    <input
+                      type="radio"
+                      name="ac"
+                      value="true"
+                      checked={ac.ac === true}
+                      onChange={handleAc}
+                      className="mr-1"
+                    />
+                    Tersedia
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="ac"
+                      value="false"
+                      checked={ac.ac === false}
+                      onChange={handleAc}
+                      className="mr-1"
+                    />
+                    Tidak Tersedia
+                  </label>
+                </div>
+              </div>
+
+              <div >
+                <label className="block text-gray-700">Harga</label>
+                <input
+                  type="number"
+                  name="harga"
+                  value={newProduct.harga}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Minimum</label>
+                <input
+                  type="number"
+                  name="minimum"
+                  value={newProduct.minimum}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div >
+                <label className="block text-gray-700">Maximum</label>
+                <input
+                  type="number"
+                  name="maximum"
+                  value={newProduct.maximum}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-6">
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={isEditMode ? handleSaveEdit : handleAddProduct}
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition"
+                >
+                  {isEditMode ? "Simpan" : "Tambah"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

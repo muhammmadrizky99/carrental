@@ -4,9 +4,21 @@ import cors from 'cors';
 import prm from '../src/config/database'; // Koneksi database menggunakan Prisma
 import router from '../src/routes/auth'; // Router auth
 import mobilRouter from './routes/mobil'; //router mobil
+import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 2500;
+
+// app.use(express.static(path.join(__dirname, '../public')))
+
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+
+
+app.use('/uploads', (req, res, next) => {
+    console.log(`Request for image: ${req.url}`);
+    next();
+});
+
 
 // Middleware
 app.use(cors({
@@ -41,6 +53,7 @@ app.get("/test", async (req: Request, res: Response) => {
 // Using auth router
 app.use("/api", router);
 app.use("/api", mobilRouter);
+
 
 
 // Starting the server
