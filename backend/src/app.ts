@@ -9,20 +9,20 @@ import path from 'path';
 const app = express();
 const PORT = process.env.PORT || 2500;
 
-// app.use(express.static(path.join(__dirname, '../public')))
-
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+app.use('/uploads', express.static(path.resolve(__dirname, '../public/uploads')));
 
 
-app.use('/uploads', (req, res, next) => {
-    console.log(`Request for image: ${req.url}`);
-    next();
-});
+
+// app.use('/uploads', (req, res, next) => {
+//     console.log(`Request for image: ${req.url}`);
+//     next();
+// });
 
 
 // Middleware
 app.use(cors({
-    origin:"http://localhost:3000",credentials:true
+    origin:"http://localhost:3000",
+    credentials:true
 }));
 app.use(express.json());
 
@@ -53,6 +53,8 @@ app.get("/test", async (req: Request, res: Response) => {
 // Using auth router
 app.use("/api", router);
 app.use("/api", mobilRouter);
+
+
 
 
 

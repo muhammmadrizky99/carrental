@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "mobil" ADD COLUMN     "stok" INTEGER NOT NULL DEFAULT 0;

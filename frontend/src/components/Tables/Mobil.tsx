@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
+import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfo, faInfoCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
+import 'tailwindcss/tailwind.css';
+import { headers } from "next/headers";
 // import Buttons from "@/app/ui/buttons/page";
 
 const TableTwo = () => {
@@ -37,13 +43,23 @@ const TableTwo = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [ac, setAc] = useState({ ac: true });
 
+
   const handleAc = (e: any) => {
     const value = e.target.value
     setAc({
       ...ac,
       ac: value === "true"
     })
-  }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:2500/api/mobil');
+      setData(response.data.data);
+    } catch (error) {
+      console.log("Error fetching data: ", error);
+    }
+  };
 
   const [newProduct, setNewProduct] = useState<Product>({
     filter: () => true,
@@ -53,6 +69,7 @@ const TableTwo = () => {
     tipe: "",
     merek: "",
     model: "",
+    stok: 0,
     tahun: new Date().getFullYear(),
     transmisi: "",
     kapasitasMesin: 0,
@@ -97,19 +114,21 @@ const TableTwo = () => {
 
 
 
-  //tambah
+  //tambah produk
   const handleAddProduct = async () => {
     // setProductData([...productData, newProduct]);
     // setModalOpen(false);
     try {
       console.log("Sending product data: ", newProduct);
-      const response = axios.post("http://localhost:2500/api/mobil", {
+      const response = await axios.post("http://localhost:2500/api/mobil", {
+        headers: { "Content-Type": "multipart/form-data" },
         gambar: newProduct.gambar,
         namaMobil: newProduct.namaMobil,
         deskripsi: newProduct.deskripsi,
         tipe: newProduct.tipe,
         merek: newProduct.merek,
         model: newProduct.model,
+        stok: newProduct.stok,
         tahun: newProduct.tahun,
         transmisi: newProduct.transmisi,
         kapasitasMesin: newProduct.kapasitasMesin,
@@ -124,8 +143,14 @@ const TableTwo = () => {
         maximum: newProduct.maximum
       }, { "headers": { "Content-Type": "multipart/form-data" } });
       console.log("Response after adding product:", response);
+      fetchData(); //refresh data
+      setModalOpen(false);
+      toast.success("Data berhasil ditambahkan");
+      // Reset form setelah sukses
+      resetForm();
     } catch (error) {
       console.log("Error adding product", error);
+      toast.error("Gagal menambahkan produk");
 
     }
     resetForm();
@@ -133,7 +158,6 @@ const TableTwo = () => {
 
 
   //edit
-
   const handleEditProduct = (index: number) => {
     setEditMode(true);
     setEditIndex(index);
@@ -144,7 +168,7 @@ const TableTwo = () => {
   const handleSaveEdit = () => {
     if (editIndex !== null) {
       console.log("Saving edited product at index:", editIndex);  // Debugging index edit
-    console.log("New product data:", newProduct);
+      console.log("New product data:", newProduct);
       // const updatedProducts = [...productData];
       // updatedProducts[editIndex] = newProduct;
       // setProductData(updatedProducts);
@@ -155,11 +179,36 @@ const TableTwo = () => {
   };
 
   //hapus
-  const handleDeleteProduct = (index: number) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
-      // setProductData(productData.filter((_, i) => i !== index));
+  const handleDelete = async (id: number, closeToast:() => void ) => {
+    try {
+      const response = await axios.delete(`http://localhost:2500/api/mobil/${id}`);
+      toast.success("Item berhasil dihapus"); // Menampilkan pesan dari server
+      closeToast();
+      fetchData();
+      
+    } catch (error) {
+      console.error('Error deleting mobil:', error);
+      toast.error("Gagal menghapus item");
     }
   };
+
+  const confirmDelete = (id: number) => {
+    toast(
+      ({ closeToast }:{ closeToast: () => void }) => (
+        <div>
+          <p>Anda yakin ingin menghapus item ini?</p>
+          <button onClick={() => handleDelete(id, closeToast)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150"
+            >Ya</button>
+          <button onClick={closeToast}
+           className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-150"
+          >Tidak</button>
+        </div>
+      ),
+      { autoClose: false } // Toast tidak akan tertutup otomatis
+    );
+  };
+  
 
 
   //reset form
@@ -172,6 +221,7 @@ const TableTwo = () => {
       tipe: "",
       merek: "",
       model: "",
+      stok: 0,
       tahun: new Date().getFullYear(),
       transmisi: "",
       kapasitasMesin: 0,
@@ -193,18 +243,8 @@ const TableTwo = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const teamComplete = async () => {
-      try {
-        const response = await axios.get('http://localhost:2500/api/mobil');
-        setData(response.data.data);
-        console.log(response.data);
 
-      } catch (error: any) {
-        setError(error.message);
-        console.log("Error fetching data: ", error);
-      }
-    };
-    teamComplete();
+    fetchData();
   }, []);
 
 
@@ -238,8 +278,11 @@ const TableTwo = () => {
         <div className="col-span-1 flex items-center text-black ">
           <p className="font-medium">Tahun</p>
         </div>
-        <div className="col-span-2 flex items-center text-black ">
+        <div className="col-span-1 flex items-center text-black ">
           <p className="font-medium">Harga</p>
+        </div>
+        <div className="col-span-1 flex items-center text-black ">
+          <p className="font-medium">Stok</p>
         </div>
         <div className="col-span-1 flex items-center text-black ">
           <p className="font-medium">Aksi</p>
@@ -255,12 +298,12 @@ const TableTwo = () => {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="h-12.5 w-15 rounded-md">
                 {product.gambar ? (
-                  <Image
+                  <img
                     src={product.gambar}
                     width={60}
                     height={50}
                     alt="Product"
-                    unoptimized
+
                   />
                 ) : (
                   <p>Gambar tidak tersedia</p>
@@ -287,9 +330,16 @@ const TableTwo = () => {
               {product.tahun}
             </p>
           </div>
-          <div className="col-span-2 flex items-center">
+
+          <div className="col-span-1 flex items-center">
             <p className="text-sm text-black dark:text-white">
               {product.harga}
+            </p>
+          </div>
+
+          <div className="col-span-1 flex items-center">
+            <p className="text-sm text-black dark:text-white">
+              {product.stok}
             </p>
           </div>
 
@@ -298,17 +348,23 @@ const TableTwo = () => {
             {/* Tombol Edit */}
             <button
               onClick={() => handleEditProduct(key)}
-              className="px-2 py-1 bg-blue-500 text-white rounded"
+              className="px-2 py-1 bg-gray-400 text-white rounded"
             >
-              Edit
+              <FontAwesomeIcon icon={faPencil} />
             </button>
 
             {/* Tombol Delete */}
-            <button
-              onClick={() => handleDeleteProduct(key)}
+            <button 
+              onClick={() => confirmDelete(product.id)}
               className="px-2 py-1 bg-red-500 text-white rounded"
             >
-              Delete
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+            <button
+              onClick={() => handleDetailProduct(key)}
+              className="px-2 py-1 bg-blue-400 text-white rounded"
+            >
+              <FontAwesomeIcon icon={faInfoCircle} />
             </button>
           </div>
         </div>
@@ -389,6 +445,16 @@ const TableTwo = () => {
                   type="text"
                   name="model"
                   value={newProduct.model}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Stok</label>
+                <input
+                  type="number"
+                  name="stok"
+                  value={newProduct.stok}
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                 />

@@ -26,6 +26,7 @@ model mobil {
   tipe String
   merek String
   model String
+  stok Int  @default(0)
   tahun Int 
   transmisi String
   kapasitasMesin Int 

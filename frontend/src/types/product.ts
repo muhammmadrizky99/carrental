@@ -8,6 +8,7 @@
     tipe: string;
     merek: string;
     model: string;
+    stok: number;
     tahun: number;
     transmisi: string;
     kapasitasMesin: number;
