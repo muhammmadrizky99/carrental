@@ -85,8 +85,7 @@ export const deleteMobil = async (req: any, res: any) => {
     try {
       const { id } = req.params;
       console.log(id);
-      
-  
+
       // Menghapus mobil berdasarkan ID
       const mobil = await prisma.mobil.delete({
         where: {
@@ -97,7 +96,6 @@ export const deleteMobil = async (req: any, res: any) => {
       if (!mobil) {
         return res.status(404).json({ message: 'Mobil tidak ditemukan' });
       }
-  
       res.status(200).json({ message: 'Mobil berhasil dihapus' });
     } catch (error) {
       console.error('Error deleting mobil:', error);
@@ -106,3 +104,77 @@ export const deleteMobil = async (req: any, res: any) => {
       await prisma.$disconnect();
     }
   };
+
+ 
+//update
+export const editMobil = async (req: Request, res: Response) => {
+  const { id } = req.params; // Mengambil ID dari parameter URL
+  const {
+    namaMobil,
+    deskripsi,
+    tipe,
+    merek,
+    model,
+    stok,
+    tahun,
+    transmisi,
+    kapasitasMesin,
+    kapasitasKursi,
+    jumlahTas,
+    jumlahPintu,
+    warna,
+    fiturLainnya,
+    ac,
+    harga,
+    minimum,
+    maximum,
+  } = req.body;
+
+  try {
+    // Menemukan mobil berdasarkan ID
+    const mobil = await prisma.mobil.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!mobil) {
+      return res.status(404).json({ msg: 'Mobil tidak ditemukan' });
+    }
+
+    // Update data mobil
+    const mobilUpdated = await prisma.mobil.update({
+      where: { id: Number(id) },
+      data: {
+        gambar: req.file ? `http://localhost:2500/uploads/${req.file.filename}` : mobil.gambar,
+        deskripsi,
+        tipe,
+        namaMobil,
+        merek,
+        model,
+        stok: Number(stok),
+        tahun: Number(tahun),
+        transmisi,
+        kapasitasMesin: Number(kapasitasMesin),
+        kapasitasKursi: Number(kapasitasKursi),
+        jumlahTas: Number(jumlahTas),
+        jumlahPintu: Number(jumlahPintu),
+        warna,
+        fiturLainnya,
+        ac: ac === "true" ? true : false,
+        harga: Number(harga),
+        minimum: Number(minimum),
+        maximum: Number(maximum),
+      },
+    });
+
+    return res.status(200).json({
+      msg: "Mobil berhasil diperbarui!",
+      data: mobilUpdated,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      msg: "Server error",
+      error,
+    });
+  }
+};

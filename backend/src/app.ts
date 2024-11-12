@@ -12,13 +12,6 @@ const PORT = process.env.PORT || 2500;
 app.use('/uploads', express.static(path.resolve(__dirname, '../public/uploads')));
 
 
-
-// app.use('/uploads', (req, res, next) => {
-//     console.log(`Request for image: ${req.url}`);
-//     next();
-// });
-
-
 // Middleware
 app.use(cors({
     origin:"http://localhost:3000",
@@ -53,9 +46,6 @@ app.get("/test", async (req: Request, res: Response) => {
 // Using auth router
 app.use("/api", router);
 app.use("/api", mobilRouter);
-
-
-
 
 
 // Starting the server

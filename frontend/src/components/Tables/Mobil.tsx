@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
@@ -10,36 +10,13 @@ import { faInfo, faInfoCircle, faTrash } from "@fortawesome/free-solid-svg-icons
 import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import 'tailwindcss/tailwind.css';
 import { headers } from "next/headers";
-// import Buttons from "@/app/ui/buttons/page";
+
 
 const TableTwo = () => {
-  // const [productData, setProductData] = useState<Product[]>([
-  //   {
-  //     filter: (arg0: (_: any, i: any) => boolean) => true,
-  //     gambar: null,
-  //     namaMobil: "",
-  //     deskripsi: "",
-  //     tipe: "",
-  //     merek: "",
-  //     model: "",
-  //     tahun: new Date().getFullYear(),
-  //     transmisi: "",
-  //     kapasitasMesin: 0,
-  //     kapasitasKursi: 0,
-  //     jumlahTas: 0,
-  //     jumlahPintu: 0,
-  //     warna: "",
-  //     fiturLainnya: "",
-  //     ac: false,
-  //     harga: 0,
-  //     minimum: 0,
-  //     maximum: 0,
-  //   },
-  // ]);
 
   const [form, setForm] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isEditMode, setEditMode] = useState(false);
+  const [EditMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [ac, setAc] = useState({ ac: true });
 
@@ -116,8 +93,6 @@ const TableTwo = () => {
 
   //tambah produk
   const handleAddProduct = async () => {
-    // setProductData([...productData, newProduct]);
-    // setModalOpen(false);
     try {
       console.log("Sending product data: ", newProduct);
       const response = await axios.post("http://localhost:2500/api/mobil", {
@@ -157,26 +132,33 @@ const TableTwo = () => {
   };
 
 
-  //edit
-  const handleEditProduct = (index: number) => {
+  //edit produk
+  const handleEditProduct = (index: number ) => {
     setEditMode(true);
     setEditIndex(index);
-    // setNewProduct(productData[index]);
     setModalOpen(true);
+    setNewProduct(data[index]);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editIndex !== null) {
-      console.log("Saving edited product at index:", editIndex);  // Debugging index edit
-      console.log("New product data:", newProduct);
-      // const updatedProducts = [...productData];
-      // updatedProducts[editIndex] = newProduct;
-      // setProductData(updatedProducts);
+      try {
+        console.log("Saving edited product at index:", editIndex); 
+        const response = await axios.put(`http://localhost:2500/api/mobil/${data[editIndex].id}`, newProduct);
+        console.log("Produk berhasil diperbarui", response.data);
+
+        fetchData();
+        setModalOpen(false);
+        setEditMode(false);
+        setEditIndex(null);
+        resetForm();
+        toast.success("Data berhasil diperbarui");
+      } catch(error) {
+        console.error("Error updating product:", error);
+        toast.error("Gagal memperbarui data produk");
+      }
     }
-    setModalOpen(false);
-    setEditMode(false);
-    resetForm();
-  };
+  };  
 
   //hapus
   const handleDelete = async (id: number, closeToast:() => void ) => {
@@ -196,20 +178,19 @@ const TableTwo = () => {
     toast(
       ({ closeToast }:{ closeToast: () => void }) => (
         <div>
-          <p>Anda yakin ingin menghapus item ini?</p>
+          <p className="mb-5">Anda yakin ingin menghapus item ini?</p>
+          
           <button onClick={() => handleDelete(id, closeToast)}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150"
+            className="px-4 py-1 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-150 mr-2"
             >Ya</button>
           <button onClick={closeToast}
-           className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-150"
+           className="px-4 py-1 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400 transition duration-150"
           >Tidak</button>
         </div>
       ),
       { autoClose: false } // Toast tidak akan tertutup otomatis
     );
   };
-  
-
 
   //reset form
   const resetForm = () => {
@@ -243,7 +224,6 @@ const TableTwo = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-
     fetchData();
   }, []);
 
@@ -360,12 +340,12 @@ const TableTwo = () => {
             >
               <FontAwesomeIcon icon={faTrash} />
             </button>
-            <button
+            {/* <button
               onClick={() => handleDetailProduct(key)}
               className="px-2 py-1 bg-blue-400 text-white rounded"
             >
               <FontAwesomeIcon icon={faInfoCircle} />
-            </button>
+            </button> */}
           </div>
         </div>
       ))}
@@ -391,7 +371,7 @@ const TableTwo = () => {
               <div className="mt-4">
                 <h3 className="text-sm font-semibold">Preview Gambar:</h3>
                 <img
-                  src={URL.createObjectURL(newProduct.gambar)}
+                  src={typeof newProduct.gambar === 'string' ? newProduct.gambar : URL.createObjectURL(newProduct.gambar)}
                   alt="Preview"
                   className="mt-2 rounded"
                   width={100}  // Menampilkan gambar dengan ukuran yang sesuai
@@ -609,10 +589,10 @@ const TableTwo = () => {
                   Batal
                 </button>
                 <button
-                  onClick={isEditMode ? handleSaveEdit : handleAddProduct}
+                  onClick={EditMode ? handleSaveEdit : handleAddProduct}
                   className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition"
                 >
-                  {isEditMode ? "Simpan" : "Tambah"}
+                  {EditMode ? "Simpan" : "Tambah"}
                 </button>
               </div>
             </div>
