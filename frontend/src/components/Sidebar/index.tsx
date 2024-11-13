@@ -97,7 +97,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Status Booking",
-        route: "/calendar",
+        route: "/statusbooking",
       },
       {
         icon: (

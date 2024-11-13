@@ -1,6 +1,9 @@
 export type Package = {
-  name: string;
-  price: number;
-  invoiceDate: string;
-  status: string;
+
+  tglbooking: Date;
+  namaMobil: String;
+    pengguna: string;
+    tglmulai: Date;
+    tglakhir: Date;
+    status: String;
 };

@@ -232,9 +232,9 @@ const TableTwo = () => {
   return (
     <div className="rounded-sm border p-6 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="py-6">
-        <h4 className="text-xl font-semibold text-black dark:text-white">
-          DATA MOBIL
-        </h4>
+        {/* <h4 className="text-xl font-semibold text-black dark:text-white">
+          Data Mobil
+        </h4> */}
         <div className="flex justify-end">
           <button
             onClick={() => setModalOpen(true)}
@@ -340,12 +340,12 @@ const TableTwo = () => {
             >
               <FontAwesomeIcon icon={faTrash} />
             </button>
-            {/* <button
+            <button
               onClick={() => handleDetailProduct(key)}
               className="px-2 py-1 bg-blue-400 text-white rounded"
             >
               <FontAwesomeIcon icon={faInfoCircle} />
-            </button> */}
+            </button>
           </div>
         </div>
       ))}
