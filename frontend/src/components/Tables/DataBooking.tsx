@@ -35,20 +35,20 @@ const TableDataBooking = () => {
               <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
                 Tanggal booking
               </th>
-              <th className="min-w-[100px] py-4 font-medium text-black dark:text-white ">
+              <th className="min-w-[140px] py-4 font-medium text-black dark:text-white ">
                 Mobil
               </th>
-              <th className="min-w-[130px] py-4 font-medium text-black dark:text-white">
+              <th className="min-w-[140px] py-4 font-medium text-black dark:text-white">
                 Pengguna
               </th>
-              <th className="min-w-[150px]  py-4 font-medium text-black dark:text-white">
+              <th className="min-w-[160px]  py-4 font-medium text-black dark:text-white">
                 Tanggal Mulai
               </th>
-              <th className="min-w-[150px]  py-4 font-medium text-black dark:text-white">
+              <th className="min-w-[160px]  py-4 font-medium text-black dark:text-white">
                 Tanggal Akhir
               </th>
-              <th className="min-w-[90px] px-4 py-4 font-medium text-black dark:text-white">
-                Status
+              <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
+                Pengembalian
               </th>
               <th className="px-4 py-4 font-medium text-black dark:text-white">
                 {/* Aksi */}
@@ -85,15 +85,13 @@ const TableDataBooking = () => {
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                <select
-                    // value={packageItem.status}
-                    // onChange={(e) => handleStatusChange(index, e.target.value)}
-                    className="rounded bg-opacity-10 text-sm font-medium p-2"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Setuju">Setuju</option>
-                    <option value="Tidak Setuju">Tidak Setuju</option>
-                  </select>
+                <button
+                      // onClick={() => confirmDelete(product.id)}
+                      className="px-2  bg-blue-500 text-white rounded   "
+                    >
+                      Kembalikan Mobil
+                      {/* <FontAwesomeIcon icon={faTrash} /> */}
+                    </button>
                 </td>
 
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -104,6 +102,13 @@ const TableDataBooking = () => {
                       className="px-2 py-1 bg-red-500 text-white rounded"
                     >
                       Hapus
+                      {/* <FontAwesomeIcon icon={faTrash} /> */}
+                    </button>
+                    <button
+                      // onClick={() => confirmDelete(product.id)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded"
+                    >
+                      Detail
                       {/* <FontAwesomeIcon icon={faTrash} /> */}
                     </button>
 
