@@ -78,7 +78,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Mobil",
-        route: "/tables",
+        route: "/mobil",
       },
       {
         icon: (
@@ -120,7 +120,7 @@ const menuGroups = [
           </svg>
         ),
         label: "User",
-        route: "/profile",
+        route: "/user",
       },
       // {
       //   icon: (
@@ -191,7 +191,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Data booking",
-        route: "/contoh",
+        route: "/databooking",
       },
       {
         icon: (
@@ -402,7 +402,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-          <Link href="/">
+          {/* <Link href="/">
             <Image
               width={176}
               height={32}
@@ -410,7 +410,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               alt="Logo"
               priority
             />
-          </Link>
+          </Link> */}
 
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}

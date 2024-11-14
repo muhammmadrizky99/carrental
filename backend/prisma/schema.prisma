@@ -17,6 +17,10 @@ model users {
   nama     String @db.VarChar(255)
   email    String @unique @db.VarChar(255)  
   password String @db.VarChar(255)
+  alamat String @db.VarChar(255) @default("")
+  notelp String @db.VarChar(255) @default("")
+  role String @db.VarChar(100) @default("")
+  status String @db.VarChar(100) @default("")
 }
 model mobil {
   id Int @id @default(autoincrement())
