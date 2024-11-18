@@ -10,9 +10,8 @@ const router = express.Router();
 // Menggunakan LoginController untuk route login
 router.post('/login', LoginController);
 
-//route register
 router.post('/register', RegisterController);
 
-// router.post('/tambah-mobil', MobilController);
+
 
 export default router;

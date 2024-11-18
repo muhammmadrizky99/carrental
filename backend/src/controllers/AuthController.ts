@@ -1,29 +1,38 @@
-// src/controllers/AuthController.ts
 import { Request, Response } from 'express';
 import prm from '../config/database';
+import bcrypt from 'bcrypt';
 
 export const LoginController = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { email, password } = req.body;
-        
 
-        const user = await prm.users.findUnique({ where: { email: email } })
-        if (!user) return res.status(400).json({
-            statusCode: 400,
-            msg: "Not registered"
-        })
+        // Cari pengguna berdasarkan email
+        const user = await prm.users.findUnique({ where: { email: email } });
 
-        if (user.password !== password) {
+        // Jika pengguna tidak ditemukan
+        if (!user) {
+            return res.status(400).json({
+                statusCode: 400,
+                msg: "Not registered"
+            });
+        }
+
+        // Periksa apakah password yang dimasukkan valid (menggunakan bcrypt.compare)
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        // Jika password tidak valid
+        if (!isPasswordValid) {
             return res.status(401).json({
                 statusCode: 401,
                 msg: "Invalid credential"
-            })
+            });
         }
 
+        // Jika login berhasil
         return res.status(200).json({
             statusCode: 200,
             msg: "Login successful",
-            data: { email }, 
+            data: { email },  // Anda bisa menambahkan data lain seperti nama atau token jika diperlukan
         });
 
     } catch (error) {

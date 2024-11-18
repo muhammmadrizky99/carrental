@@ -24,7 +24,9 @@ export const RegisterController = async (req: Request, res: Response) => {
             data: {
                 nama: nama,
                 email: email,
-                password: hashedPassword // Simpan password yang sudah di-hash
+                password: hashedPassword,
+                role:"pengguna",
+                status:"aktiv"
             }
         });
 
@@ -32,7 +34,7 @@ export const RegisterController = async (req: Request, res: Response) => {
             statusCode: 201,
             msg: "User registered successfully",
             data: {
-                email: newUser.email, // Anda dapat mengembalikan data lain yang diinginkan
+                email: newUser.email, 
             }
         });
     } catch (error) {

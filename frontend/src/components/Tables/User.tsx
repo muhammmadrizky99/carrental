@@ -253,7 +253,7 @@ const TableUser = () => {
     <p className="font-medium">Email</p>
   </div>
   <div className="col-span-2 flex items-center text-black -ml-10">
-    <p className="font-medium">Nomor Hp</p>
+    <p className="font-medium">Status</p>
   </div>
   <div className="col-span-1 flex items-center text-black -ml-11">
     <p className="font-medium">Role</p>
