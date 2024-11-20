@@ -6,10 +6,12 @@ import { Product } from "@/types/product";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfo, faInfoCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faInfo, faInfoCircle, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import 'tailwindcss/tailwind.css';
 import { headers } from "next/headers";
+import DetailMobil from "./DetailMobil";
+
 
 
 const TableTwo = () => {
@@ -19,6 +21,8 @@ const TableTwo = () => {
   const [EditMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [ac, setAc] = useState({ ac: true });
+
+
 
 
   const handleAc = (e: any) => {
@@ -48,7 +52,7 @@ const TableTwo = () => {
     model: "",
     stok: 0,
     tahun: new Date().getFullYear(),
-    transmisi: "",
+    transmisi: "Manual",
     kapasitasMesin: 0,
     kapasitasKursi: 0,
     jumlahTas: 0,
@@ -89,6 +93,14 @@ const TableTwo = () => {
     }
   };
 
+  //manggil detail
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const handleDetailProduct = (index: number) => {
+    setSelectedProduct(data[index]);
+    setDetailModalOpen(true);
+  };
 
 
   //tambah produk
@@ -133,7 +145,7 @@ const TableTwo = () => {
 
 
   //edit produk
-  const handleEditProduct = (index: number ) => {
+  const handleEditProduct = (index: number) => {
     setEditMode(true);
     setEditIndex(index);
     setModalOpen(true);
@@ -143,7 +155,7 @@ const TableTwo = () => {
   const handleSaveEdit = async () => {
     if (editIndex !== null) {
       try {
-        console.log("Saving edited product at index:", editIndex); 
+        console.log("Saving edited product at index:", editIndex);
         const response = await axios.put(`http://localhost:2500/api/mobil/${data[editIndex].id}`, newProduct);
         console.log("Produk berhasil diperbarui", response.data);
 
@@ -153,21 +165,21 @@ const TableTwo = () => {
         setEditIndex(null);
         resetForm();
         toast.success("Data berhasil diperbarui");
-      } catch(error) {
+      } catch (error) {
         console.error("Error updating product:", error);
         toast.error("Gagal memperbarui data produk");
       }
     }
-  };  
+  };
 
   //hapus
-  const handleDelete = async (id: number, closeToast:() => void ) => {
+  const handleDelete = async (id: number, closeToast: () => void) => {
     try {
       const response = await axios.delete(`http://localhost:2500/api/mobil/${id}`);
       toast.success("Item berhasil dihapus"); // Menampilkan pesan dari server
       closeToast();
       fetchData();
-      
+
     } catch (error) {
       console.error('Error deleting mobil:', error);
       toast.error("Gagal menghapus item");
@@ -176,15 +188,15 @@ const TableTwo = () => {
 
   const confirmDelete = (id: number) => {
     toast(
-      ({ closeToast }:{ closeToast: () => void }) => (
+      ({ closeToast }: { closeToast: () => void }) => (
         <div>
           <p className="mb-5">Anda yakin ingin menghapus item ini?</p>
-          
+
           <button onClick={() => handleDelete(id, closeToast)}
             className="px-4 py-1 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-150 mr-2"
-            >Ya</button>
+          >Ya</button>
           <button onClick={closeToast}
-           className="px-4 py-1 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400 transition duration-150"
+            className="px-4 py-1 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400 transition duration-150"
           >Tidak</button>
         </div>
       ),
@@ -237,7 +249,11 @@ const TableTwo = () => {
         </h4> */}
         <div className="flex justify-end">
           <button
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setEditMode(false);
+              resetForm();
+              setModalOpen(true);
+            }}
             className="px-3 py-1 bg-primary text-white rounded"
           >
             + Tambah Mobil
@@ -334,12 +350,14 @@ const TableTwo = () => {
             </button>
 
             {/* Tombol Delete */}
-            <button 
+            <button
               onClick={() => confirmDelete(product.id)}
               className="px-2 py-1 bg-red-500 text-white rounded"
             >
               <FontAwesomeIcon icon={faTrash} />
             </button>
+
+            {/* Tombol detail */}
             <button
               onClick={() => handleDetailProduct(key)}
               className="px-2 py-1 bg-blue-400 text-white rounded"
@@ -350,12 +368,28 @@ const TableTwo = () => {
         </div>
       ))}
 
-      {/* ketika buka modal */}
+      {isDetailModalOpen && selectedProduct && (
+        <DetailMobil
+          isOpen={isDetailModalOpen}
+          product={selectedProduct}
+          onClose={() => setDetailModalOpen(false)} />
+      )}
+
+      {/* ketika buka modal tambah & edit*/}
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-4xl mx-4 md:mx-auto max-h-screen overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-center">Tambah Mobil</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 overflow-y-auto">
+          <div className="bg-white p-15 rounded-xl shadow-lg w-full max-w-4xl mx-4 md:mx-auto max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-end ">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-red-600 transition">
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+            <h2 className="text-xl font-semibold mb-4 mt-8 text-center">
+            {EditMode ? "Edit Mobil" : "Tambah Mobil"}
+            </h2>
 
             <div className="mb-4">
               <label className="block text-gray-700">Upload Gambar</label>
@@ -452,13 +486,18 @@ const TableTwo = () => {
               </div>
               <div >
                 <label className="block text-gray-700">Transmisi</label>
-                <input
-                  type="text"
+                <select
                   name="transmisi"
                   value={newProduct.transmisi}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setNewProduct((prev) => ({ ...prev, transmisi: e.target.value }))
+                  }
                   className="w-full p-2 border rounded"
-                />
+                >
+                  <option value="Manual">Manual</option>
+                  <option value="Automatic">Automatic</option>
+
+                </select>
               </div>
               <div >
                 <label className="block text-gray-700">Kapasitas Mesin</label>

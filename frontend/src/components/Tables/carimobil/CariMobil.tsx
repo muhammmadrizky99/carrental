@@ -1,4 +1,5 @@
 "use client"
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
 interface Mobil {
@@ -8,72 +9,170 @@ interface Mobil {
   harga: number;
   transmisi: string;
   tahun: number;
-  gambar: string; // Gambar sebaiknya berupa URL string, bukan File
+  gambar: string;
 }
 
 const CariMobil: React.FC = () => {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    namaMobil: string;
+    tipe: string;
+    model: string;
+    tahun: number | null;
+    harga: [number, number | null];
+    transmisi: string;
+  }>({
     namaMobil: '',
     tipe: '',
     model: '',
-    tahun: [2000, 2023],
-    harga: [0, 5000],
+    tahun: null,
+    harga: [0, null],
     transmisi: '',
   });
 
   const [cars, setCars] = useState<Mobil[]>([]); // State untuk menyimpan data mobil
   const [loading, setLoading] = useState<boolean>(true); // State untuk loading indicator
   const [error, setError] = useState<string>(''); // State untuk menyimpan pesan error
+  const [tipeOptions, setTipeOptions] = useState<string[]>([]);
+  const [tahunOptions, setTahunOptions] = useState<number[]>([]);
 
-  // Fetch data dari API
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const response = await fetch('http://localhost:2500/api/mobil');
-        const result = await response.json();
-  
-        console.log('Response Data:', result); // Menampilkan data yang diterima dari API
-  
-        // Mengakses array data di dalam properti "data"
-        if (Array.isArray(result.data)) {
-          setCars(result.data); // Mengisi state 'cars' dengan data dari API
-        } else {
-          throw new Error('Invalid data format: Expected an array');
-        }
-      } catch (error: any) {
-        console.error('Error fetching cars:', error);
-        setError('Gagal mengambil data mobil.');
-        setCars([]); // Mengatur state 'cars' menjadi array kosong jika gagal
-      }
+
+  const fetchAllCars = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:2500/api/mobil");
+      console.log(response.data);
+      
+      // if (!response.ok) throw new Error("Gagal mengambil data mobil");
+      // const result = await response.json();
+      const data: any = response.data.data;
+      setCars(data);
+
+      console.log(cars ?? 'ddd');
+      // console.log(cars.map((car)=>car.tahun));
+      setTahunOptions(Array.from(new Set(data.map((car:any)=>car.tahun))))
+    } catch (error: any) {
+      console.error("Error fetching cars:", error);
+      setError("Gagal mengambil data mobil.");
+    } finally {
+      console.log("final");
+      
       setLoading(false);
+    }
+  };
+
+useEffect(()=>{
+  console.log("test");
+  
+  fetchAllCars();
+},[])
+
+  useEffect(() => {
+    const fetchTipeOptions = async () => {
+      try {
+        const response = await fetch('http://localhost:2500/api/mobil/tipe');
+        if (!response.ok) {
+          throw new Error('Failed to fetch types');
+        }
+        const result = await response.json();
+        setTipeOptions(result.data || []); // Simpan daftar tipe di state
+        console.log("tipeOptions");
+
+        
+      } catch (error) {
+        console.error('Gagal mengambil data tipe:', error);
+      }
     };
-  
-    fetchCars();
+    fetchTipeOptions();
+    console.log("tes");
+    
   }, []);
+
+  // Fetch opsi tahun dari API\
+  // useEffect(() => {
+  //   const fetchTahunOptions = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:2500/api/mobil/tahun');
+  //       if (!response.ok) {
+  //         throw new Error('Gagal mengambil data tahun');
+  //       }
+  //       const result = await response.json();
+  //       console.log(result); // Cek hasil response
+  //       setTahunOptions(result.data || []); // Periksa apakah result.data sesuai
+  //     } catch (error) {
+  //       console.error('Error fetching tahun options:', error);
+  //     }
+  //   };
+  //   fetchTahunOptions();
+  // }, []);
+
+
+  // Fetch data mobil berdasarkan filter tahun
+  const fetchMobilByTahun = async (tahun: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:2500/api/mobil/tahun/${tahun}`);
+      if (!response.ok) throw new Error("Gagal mengambil data mobil");
+      const result = await response.json();
+      setCars(result.data || []);
+    } catch (error: any) {
+      console.error("Error fetching cars:", error);
+      setError("Gagal mengambil data mobil.");
+    } finally {
+      setLoading(false);
+    }
+  };
   
+
+
+
+  // Fetch semua data mobil
+  useEffect(() => {
+    
+
+    fetchAllCars();
+  
+    // if (!filters.tahun) {
+    //   fetchAllCars(); // Ambil semua data jika tahun tidak dipilih
+    // } else {
+    //   fetchMobilByTahun(String(filters.tahun)); // Ambil data berdasarkan tahun
+    // }
+  }, [filters.tahun]);
+  
+  
+
+
 
   // Fungsi untuk menangani perubahan filter
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({
+      ...prev,
+      [name]: name === 'tahun' ? (value ? Number(value) : null) : value, // Convert value to number for tahun
+    }));
   };
+  
 
   // Filter mobil berdasarkan filter yang diterapkan
   const filteredCars = cars.filter((car) => {
-    const withinPriceRange = car.harga >= filters.harga[0] && car.harga <= filters.harga[1];
-    const withinYearRange = car.tahun >= filters.tahun[0] && car.tahun <= filters.tahun[1];
+    const withinPriceRange =
+      car.harga >= filters.harga[0] &&
+      (filters.harga[1] === null || car.harga <= filters.harga[1]!);
+  
     const matchesTransmisi = filters.transmisi ? car.transmisi === filters.transmisi : true;
     const matchesNamaMobil = car.namaMobil.toLowerCase().includes(filters.namaMobil.toLowerCase());
     const matchesTipe = filters.tipe ? car.tipe === filters.tipe : true;
-
+    const matchesTahun = filters.tahun ? car.tahun === filters.tahun : true; // Only match if tahun is selected
+  
     return (
       withinPriceRange &&
-      withinYearRange &&
       matchesTransmisi &&
       matchesNamaMobil &&
-      matchesTipe
+      matchesTipe &&
+      matchesTahun
     );
   });
+  
+
 
   return (
     <div className="container mx-auto p-4">
@@ -107,34 +206,34 @@ const CariMobil: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <option value="">Semua Tipe</option>
-                {/* Tipe mobil bisa diisi berdasarkan data API */}
-                <option value="SUV">SUV</option>
-                <option value="Sedan">Sedan</option>
-                <option value="Hatchback">Hatchback</option>
-                {/* Tambahkan tipe lainnya sesuai dengan data */}
+                {tipeOptions.map((tipe) => (
+                  <option key={tipe} value={tipe}>
+                    {tipe}
+                  </option>
+                ))}
               </select>
             </div>
+
 
             <div className="mb-4 w-full sm:w-40">
               <label className="block text-sm font-medium text-gray-700">Tahun</label>
               <select
                 name="tahun"
                 className="w-full border border-gray-300 rounded-md p-2"
-                value={filters.tahun[0] === 0 ? '' : String(filters.tahun[0])}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    tahun: [Number(e.target.value), filters.tahun[1]],
-                  })
-                }
+                value={filters.tahun || ''}  // Handle null as an empty string for the select value
+                onChange={handleFilterChange}
               >
-                <option value="">Semua Tahun</option>
-                {/* Isi tahun berdasarkan data atau range yang Anda tentukan */}
-                <option value="2020">2020</option>
-                <option value="2021">2021</option>
-                {/* Lanjutkan dengan tahun lainnya */}
+              <option value="">Semua Tahun</option>
+                {tahunOptions.map((tahun) => (
+                  <option key={tahun} value={tahun}>
+                    {tahun}
+                  </option>
+                ))}
               </select>
+
             </div>
+
+
 
             {/* Price Range Filter */}
             <div className="mb-4 w-full sm:w-60">
@@ -142,21 +241,35 @@ const CariMobil: React.FC = () => {
               <div className="flex space-x-2">
                 <input
                   type="number"
-                  name="harga"
+                  name="hargaMin"
                   placeholder="Min"
                   className="w-full border border-gray-300 rounded-md p-2"
                   value={filters.harga[0] || ""}
-                  onChange={(e) => setFilters({ ...filters, harga: [+e.target.value, filters.harga[1]] })}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      harga: [Number(e.target.value), filters.harga[1]],
+                    })
+                  }
                 />
                 <input
                   type="number"
-                  name="priceMax"
+                  name="hargaMax"
                   placeholder="Max"
                   className="w-full border border-gray-300 rounded-md p-2"
-                  value={filters.harga[1] || ""}
-                  onChange={(e) => setFilters({ ...filters, harga: [filters.harga[0], +e.target.value] })}
+                  value={filters.harga[1] === null ? "" : filters.harga[1]}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      harga: [
+                        filters.harga[0],
+                        e.target.value === "" ? null : Number(e.target.value),
+                      ],
+                    })
+                  }
                 />
               </div>
+
             </div>
 
             {/* Transmission Filter */}
@@ -164,19 +277,32 @@ const CariMobil: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700">Transmisi</label>
               <div className="flex space-x-4">
                 <button
-                  className={`px-4 py-2 rounded-md ${filters.transmisi === 'Manual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  onClick={() => setFilters({ ...filters, transmisi: 'Manual' })}
+                  className={`px-4 py-2 rounded-md ${filters.transmisi === 'Manual' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                    }`}
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      transmisi: prev.transmisi === 'Manual' ? '' : 'Manual', // Toggle antara 'Manual' dan ''
+                    }))
+                  }
                 >
                   Manual
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-md ${filters.transmisi === 'Automatic' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  onClick={() => setFilters({ ...filters, transmisi: 'Automatic' })}
+                  className={`px-4 py-2 rounded-md ${filters.transmisi === 'Automatic' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                    }`}
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      transmisi: prev.transmisi === 'Automatic' ? '' : 'Automatic', // Toggle antara 'Automatic' dan ''
+                    }))
+                  }
                 >
                   Automatic
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
