@@ -1,5 +1,6 @@
 "use client"
 import axios from 'axios';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 interface Mobil {
@@ -41,7 +42,7 @@ const CariMobil: React.FC = () => {
       setLoading(true);
       const response = await axios.get("http://localhost:2500/api/mobil");
       console.log(response.data);
-      
+
       // if (!response.ok) throw new Error("Gagal mengambil data mobil");
       // const result = await response.json();
       const data: any = response.data.data;
@@ -49,22 +50,22 @@ const CariMobil: React.FC = () => {
 
       console.log(cars ?? 'ddd');
       // console.log(cars.map((car)=>car.tahun));
-      setTahunOptions(Array.from(new Set(data.map((car:any)=>car.tahun))))
+      setTahunOptions(Array.from(new Set(data.map((car: any) => car.tahun))))
     } catch (error: any) {
       console.error("Error fetching cars:", error);
       setError("Gagal mengambil data mobil.");
     } finally {
       console.log("final");
-      
+
       setLoading(false);
     }
   };
 
-useEffect(()=>{
-  console.log("test");
-  
-  fetchAllCars();
-},[])
+  useEffect(() => {
+    console.log("test");
+
+    fetchAllCars();
+  }, [])
 
   useEffect(() => {
     const fetchTipeOptions = async () => {
@@ -77,33 +78,17 @@ useEffect(()=>{
         setTipeOptions(result.data || []); // Simpan daftar tipe di state
         console.log("tipeOptions");
 
-        
+
       } catch (error) {
         console.error('Gagal mengambil data tipe:', error);
       }
     };
     fetchTipeOptions();
     console.log("tes");
-    
+
   }, []);
 
-  // Fetch opsi tahun dari API\
-  // useEffect(() => {
-  //   const fetchTahunOptions = async () => {
-  //     try {
-  //       const response = await fetch('http://localhost:2500/api/mobil/tahun');
-  //       if (!response.ok) {
-  //         throw new Error('Gagal mengambil data tahun');
-  //       }
-  //       const result = await response.json();
-  //       console.log(result); // Cek hasil response
-  //       setTahunOptions(result.data || []); // Periksa apakah result.data sesuai
-  //     } catch (error) {
-  //       console.error('Error fetching tahun options:', error);
-  //     }
-  //   };
-  //   fetchTahunOptions();
-  // }, []);
+
 
 
   // Fetch data mobil berdasarkan filter tahun
@@ -121,24 +106,24 @@ useEffect(()=>{
       setLoading(false);
     }
   };
-  
+
 
 
 
   // Fetch semua data mobil
   useEffect(() => {
-    
+
 
     fetchAllCars();
-  
+
     // if (!filters.tahun) {
     //   fetchAllCars(); // Ambil semua data jika tahun tidak dipilih
     // } else {
     //   fetchMobilByTahun(String(filters.tahun)); // Ambil data berdasarkan tahun
     // }
   }, [filters.tahun]);
-  
-  
+
+
 
 
 
@@ -150,19 +135,19 @@ useEffect(()=>{
       [name]: name === 'tahun' ? (value ? Number(value) : null) : value, // Convert value to number for tahun
     }));
   };
-  
+
 
   // Filter mobil berdasarkan filter yang diterapkan
   const filteredCars = cars.filter((car) => {
     const withinPriceRange =
       car.harga >= filters.harga[0] &&
       (filters.harga[1] === null || car.harga <= filters.harga[1]!);
-  
+
     const matchesTransmisi = filters.transmisi ? car.transmisi === filters.transmisi : true;
     const matchesNamaMobil = car.namaMobil.toLowerCase().includes(filters.namaMobil.toLowerCase());
     const matchesTipe = filters.tipe ? car.tipe === filters.tipe : true;
     const matchesTahun = filters.tahun ? car.tahun === filters.tahun : true; // Only match if tahun is selected
-  
+
     return (
       withinPriceRange &&
       matchesTransmisi &&
@@ -171,7 +156,7 @@ useEffect(()=>{
       matchesTahun
     );
   });
-  
+
 
 
   return (
@@ -223,7 +208,7 @@ useEffect(()=>{
                 value={filters.tahun || ''}  // Handle null as an empty string for the select value
                 onChange={handleFilterChange}
               >
-              <option value="">Semua Tahun</option>
+                <option value="">Semua Tahun</option>
                 {tahunOptions.map((tahun) => (
                   <option key={tahun} value={tahun}>
                     {tahun}
@@ -325,7 +310,17 @@ useEffect(()=>{
               <p className="text-sm text-gray-600 mb-2">{car.tipe}</p>
               <p className="text-sm text-gray-800 font-bold mb-2">Rp {car.harga}/day</p>
               <p className="text-sm text-gray-600 mb-4">{car.tahun} - {car.transmisi}</p>
-              <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-md">Sewa Sekarang</button>
+              {/* <button 
+              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md"
+              onClick={() => window.location.href = `/detailsewa/${car.id}`}>
+                Sewa Sekarang
+              </button> */}
+
+              <Link href={`/umum/detailsewa/${car.id}`}>
+                <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">
+                  Sewa Sekarang
+                </button>
+              </Link>
             </div>
           ))
         ) : (

@@ -13,9 +13,9 @@ const reviews = [
   },
   {
     id: 1,
-    nama: "Danic Yery",
+    nama: "Azmi A nya apa?",
     rating: 5,
-    komentar: "I really enjoyed driving this car. It's smooth and comfortable.",
+    komentar: "Yo sabana lamakkk naiak otonyoo daa!!!",
     balasan: null, // Tempat untuk menyimpan balasan admin
   },
 ];

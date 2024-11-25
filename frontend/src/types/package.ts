@@ -5,5 +5,6 @@ export type Package = {
     pengguna: string;
     tglmulai: Date;
     tglakhir: Date;
+    noHandphone: number;
     status: String;
 };

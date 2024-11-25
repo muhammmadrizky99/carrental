@@ -4,6 +4,7 @@ import { Router, Request, Response } from 'express';
 import { deleteMobil, MobilController, semuaMobil, editMobil } from '../controllers/MobilController';
 
 import { uploadFile } from '../middleware/multerUpload';
+import database from '../config/database';
 
 const mobilRouter = express.Router();
 
@@ -18,7 +19,6 @@ mobilRouter.get('/mobil/tahun/:tahun', async (req: Request, res: Response) => {
         // Ambil parameter tahun dari query
         const {tahun} = req.params;
 console.log(tahun);
-
 
         // Validasi input tahun
         if (!tahun) {
@@ -90,6 +90,43 @@ mobilRouter.get('/mobil/tipe', async (req: Request, res: Response) => {
     }
 });
 
+// Route untuk mendapatkan detail mobil berdasarkan ID
+mobilRouter.get('/mobil/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+  
+      // Query database untuk mengambil detail mobil berdasarkan ID
+      const mobil = await prm.mobil.findUnique({
+        where: {
+          id: Number(id),
+        },
+      });
+  
+      if (!mobil) {
+        return res.status(404).json({
+          statusCode: 404,
+          msg: `Mobil dengan ID ${id} tidak ditemukan.`,
+        });
+      }
+  
+      return res.status(200).json({
+        statusCode: 200,
+        msg: "Success",
+        data: mobil,
+      });
+    } catch (error) {
+      console.error('Error fetching car details:', error);
+      return res.status(500).json({
+        statusCode: 500,
+        msg: "Error fetching car details",
+      });
+    }
+  });
+  
 
 
+
+
+
+  
 export default mobilRouter;

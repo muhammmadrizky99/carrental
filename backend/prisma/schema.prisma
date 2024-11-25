@@ -19,6 +19,8 @@ model users {
   password String @db.VarChar(255)
   role String @db.VarChar(100) @default("pengguna")
   status String @db.VarChar(100) @default("aktiv")
+
+  booking booking[]
 }
 model mobil {
   id Int @id @default(autoincrement())
@@ -42,4 +44,18 @@ model mobil {
   minimum Int 
   maximum Int 
 
+
+  booking booking[]
+}
+model booking {
+  id            Int      @id @default(autoincrement())
+  tglBooking    DateTime @default(now())
+  tglMulai      DateTime
+  tglSelesai    DateTime
+  noHp          Int
+  status        String   @default("pending")
+  penggunaId    Int
+  pengguna      users    @relation(fields: [penggunaId], references: [id])
+  mobilId       Int
+  mobil         mobil    @relation(fields: [mobilId], references: [id])
 }

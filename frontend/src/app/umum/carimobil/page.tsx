@@ -1,8 +1,6 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import TableThree from "@/components/Tables/rental/Rental";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import Rental from "@/components/Tables/rental/Rental";
 import CariMobil from "@/components/Tables/carimobil/CariMobil";
 
 export const metadata: Metadata = {
