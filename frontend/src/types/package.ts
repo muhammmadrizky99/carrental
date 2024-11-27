@@ -1,10 +1,9 @@
-export type Package = {
-
-  tglbooking: Date;
-  namaMobil: String;
-    pengguna: string;
-    tglmulai: Date;
-    tglakhir: Date;
-    noHandphone: number;
-    status: String;
-};
+export interface Package {
+  id: number;
+  tglbooking: string;
+  namaMobil: string;
+  pengguna: string;
+  noHandphone: string;
+  tglmulai: string; 
+  tglakhir: string; 
+}

@@ -190,7 +190,7 @@ const menuGroups = [
             </defs>
           </svg>
         ),
-        label: "Data booking",
+        label: "Pengembalian",
         route: "/databooking",
       },
       {

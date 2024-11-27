@@ -2,9 +2,9 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import prm from '../src/config/database'; // Koneksi database menggunakan Prisma
-import router from './routes/auth'; // Router auth
-import mobilRouter from './routes/mobil'; //router mobil
+import router from './routes/api'; 
 import path from 'path';
+
 
 const app = express();
 const PORT = process.env.PORT || 2500;
@@ -44,9 +44,9 @@ app.get("/test", async (req: Request, res: Response) => {
     }
 });
 
-// Using auth router
+//  router
 app.use("/api", router);
-app.use("/api", mobilRouter);
+
 
 
 // Starting the server

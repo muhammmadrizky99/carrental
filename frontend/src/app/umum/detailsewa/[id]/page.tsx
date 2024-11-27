@@ -1,8 +1,7 @@
 "use client";
-
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // Gunakan useParams
+import { useParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 
@@ -12,10 +11,10 @@ const DetailSewa: React.FC = () => {
   const [mobil, setMobil] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [bookingDetails, setBookingDetails] = useState<any>({}); // State untuk form
+  const [bookingDetails, setBookingDetails] = useState<any>({});
 
-  // Menentukan tanggal booking otomatis
-  const currentDate = new Date().toISOString().split('T')[0];
+  // Default tanggal
+  const currentDate = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     const fetchDetailMobil = async () => {
@@ -39,19 +38,30 @@ const DetailSewa: React.FC = () => {
   if (loading) return <p>Loading detail mobil...</p>;
   if (error) return <p>{error}</p>;
 
-  // Handler untuk submit booking
+  // Fungsi untuk memeriksa validitas tanggal
+  const isValidDateRange = () => {
+    const { tglMulai, tglSelesai } = bookingDetails;
+    return tglMulai && tglSelesai && tglSelesai >= tglMulai;
+  };
+
   const handleBookingSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    // Validasi tanggal
+    if (!isValidDateRange()) {
+      alert("Tanggal selesai harus lebih besar dari tanggal mulai.");
+      return;
+    }
+
     const newBooking = {
-      mobil_id: mobil.id,
-      pengguna: bookingDetails.namaPemesan,
-      tgl_booking: new Date().toISOString().split("T")[0], // Tanggal hari ini
-      tgl_mulai: bookingDetails.tglMulai,
-      tgl_selesai: bookingDetails.tglSelesai,
-      no_hp: bookingDetails.noHp,
-      status: "Pending",
+      tglMulai: bookingDetails.tglMulai,
+      tglSelesai: bookingDetails.tglSelesai,
+      noHp: bookingDetails.noHp.toString(), // Konversi ke string
+      penggunaId: 1, // Simulasi pengguna ID
+      mobilId: parseInt(mobil.id, 10), // Pastikan ini angka
     };
+
+    console.log("Payload dikirim:", newBooking);
 
     try {
       const response = await axios.post("http://localhost:2500/api/booking", newBooking);
@@ -59,9 +69,8 @@ const DetailSewa: React.FC = () => {
       console.log(response.data);
     } catch (error) {
       console.error("Gagal mengirim booking:", error);
-      alert("Gagal mengirim booking.");
+      alert("Gagal mengirim booking. Coba lagi nanti.");
     }
-
   };
 
   return (
@@ -97,8 +106,8 @@ const DetailSewa: React.FC = () => {
               <input
                 type="date"
                 className="border p-2 w-full rounded-md"
-                value={currentDate} // Menggunakan tanggal saat ini secara otomatis
-                readOnly // Menjaga agar tanggal booking tidak dapat diubah
+                value={currentDate}
+                readOnly
               />
             </label>
             <label className="block mb-2">
@@ -130,7 +139,7 @@ const DetailSewa: React.FC = () => {
                 className="border p-2 w-full rounded-md"
                 required
                 onChange={(e) =>
-                  setBookingDetails({ ...bookingDetails, noHandphone: e.target.value })
+                  setBookingDetails({ ...bookingDetails, noHp: e.target.value })
                 }
               />
             </label>

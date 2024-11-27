@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -48,14 +44,25 @@ model mobil {
   booking booking[]
 }
 model booking {
-  id            Int      @id @default(autoincrement())
-  tglBooking    DateTime @default(now())
-  tglMulai      DateTime
-  tglSelesai    DateTime
-  noHp          Int
-  status        String   @default("pending")
-  penggunaId    Int
-  pengguna      users    @relation(fields: [penggunaId], references: [id])
-  mobilId       Int
-  mobil         mobil    @relation(fields: [mobilId], references: [id])
+  id          Int       @id @default(autoincrement())
+  tglBooking  DateTime  @default(now())
+  tglMulai    DateTime
+  tglSelesai  DateTime
+  noHp        String
+  status      String    @default("pending")
+  penggunaId  Int
+  mobilId     Int
+  pengguna    users     @relation(fields: [penggunaId], references: [id])
+  mobil       mobil     @relation(fields: [mobilId], references: [id])
+  
+  pengembalian pengembalian?
+}
+
+model pengembalian {
+  id                Int      @id @default(autoincrement())
+  tanggalPengembalian DateTime @default(now())
+  kondisiMobil       String
+  statusPengembalian  String    @default("Dikembalikan")
+  bookingId          Int @unique
+  booking            booking  @relation(fields: [bookingId], references: [id])
 }
