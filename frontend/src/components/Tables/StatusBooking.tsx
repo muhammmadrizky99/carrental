@@ -12,21 +12,28 @@ const StatusBooking: React.FC = () => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null); // Booking yang dipilih
 
   useEffect(() => {
+    let isMounted = true; // Untuk menghindari memory leaks
+
     const fetchBookings = async () => {
       try {
         setLoading(true);
         const response = await axios.get("http://localhost:2500/api/booking");
-        setBookings(response.data.data);
+        if (isMounted) setBookings(response.data.data);
       } catch (err) {
         console.error("Gagal mengambil data booking:", err);
-        setError("Gagal mengambil data booking.");
+        if (isMounted) setError("Gagal mengambil data booking.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchBookings();
+
+    return () => {
+      isMounted = false; // Cleanup
+    };
   }, []);
+
 
   const handlePendingClick = (booking: any) => {
     setSelectedBooking(booking);
@@ -40,14 +47,12 @@ const StatusBooking: React.FC = () => {
           status: "approved",
         });
 
-        setBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-            booking.id === selectedBooking.id
-              ? { ...booking, status: "approved" }
-              : booking
-          )
-        );
+        // Fetch ulang data bookings
+        const response = await axios.get("http://localhost:2500/api/booking");
+        setBookings(response.data.data);
+
         setShowModal(false); // Tutup modal
+        setSelectedBooking(null);
       } catch (err) {
         console.error("Gagal menyetujui booking:", err);
         setError("Gagal menyetujui booking.");
@@ -62,20 +67,19 @@ const StatusBooking: React.FC = () => {
           status: "rejected",
         });
 
-        setBookings((prevBookings) =>
-          prevBookings.map((booking) =>
-            booking.id === selectedBooking.id
-              ? { ...booking, status: "rejected" }
-              : booking
-          )
-        );
+        // Fetch ulang data bookings
+        const response = await axios.get("http://localhost:2500/api/booking");
+        setBookings(response.data.data);
+
         setShowModal(false); // Tutup modal
+        setSelectedBooking(null);
       } catch (err) {
         console.error("Gagal menolak booking:", err);
         setError("Gagal menolak booking.");
       }
     }
   };
+
 
   if (loading) return <p>Loading booking data...</p>;
   if (error) return <p>{error}</p>;
@@ -125,25 +129,34 @@ const StatusBooking: React.FC = () => {
                     <td className="px-4 py-2">
                       {booking.status === "pending" ? (
                         <button
-                          className="px-4  bg-yellow-500 text-white rounded"
+                          className="px-3 bg-yellow-500 text-white rounded-md"
                           onClick={() => handlePendingClick(booking)}
                         >
                           Pending
                         </button>
                       ) : (
                         <span
-                          className={`font-bold ${
-                            booking.status === "approved"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
+                          className={`inline-block px-3  rounded-md  ${booking.status === "approved"
+                              ? "bg-green-500 text-white"
+                              : booking.status === "rejected"
+                                ? "bg-red-500 text-white"
+                                : booking.status === "selesai"
+                                  ? "bg-blue-500 text-white"
+                                  : ""
+                            }`}
                         >
                           {booking.status === "approved"
                             ? "Approved"
-                            : "Rejected"}
+                            : booking.status === "rejected"
+                              ? "Rejected"
+                              : booking.status === "selesai"
+                                ? "Selesai"
+                                : ""}
                         </span>
                       )}
                     </td>
+
+
                     <td className="px-4 py-2">
                       Rp {booking.mobil.harga.toLocaleString()}
                     </td>
@@ -176,7 +189,7 @@ const StatusBooking: React.FC = () => {
               </button>
               <button
                 className="px-4 py-2 bg-gray-500 text-white rounded"
-                onClick={() => setShowModal(false)} 
+                onClick={() => setShowModal(false)}
               >
                 Tutup
               </button>

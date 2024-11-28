@@ -23,7 +23,7 @@ router.put('/mobil/:id', uploadFile.single('gambar'), editMobil);
 
 router.get("/booking", getBookings);
 router.post("/booking", createBooking);
-router.put("/booking/:id", updateBookingStatus); 
+router.put("/booking/:id", updateBookingStatus);
 
 router.get('/mobil/tahun/:tahun', mobil );
 router.get('/mobil/tipe', tipeMobil);

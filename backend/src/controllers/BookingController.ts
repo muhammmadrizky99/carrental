@@ -8,6 +8,7 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
       include: { 
         mobil: true,  // Pastikan 'mobil' sesuai dengan nama relasi dalam model Prisma Anda
         pengguna: true,  // Perbaiki dari 'users' menjadi 'pengguna' jika model Anda menggunakan 'pengguna'
+        pengembalian: true
       },
     });
     res.status(200).json({ success: true, data: bookings });
