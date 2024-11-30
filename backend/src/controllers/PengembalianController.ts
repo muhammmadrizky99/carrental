@@ -95,3 +95,35 @@ export const pengembalianMobil = async (req: Request, res: Response) => {
       });
     }
 };
+
+// Hapus booking berdasarkan id
+export const deleteBooking = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking tidak ditemukan" });
+    }
+
+    // First, delete any related pengembalian records
+    await prisma.pengembalian.deleteMany({
+      where: { bookingId: Number(id) },
+    });
+
+    // Now, delete the booking record
+    await prisma.booking.delete({
+      where: { id: Number(id) },
+    });
+
+    return res.status(200).json({ message: "Booking berhasil dihapus" });
+  } catch (err: any) {
+    console.error("Gagal menghapus booking:", err);
+    return res.status(500).json({
+      message: `Gagal menghapus booking: ${err.message}`,
+    });
+  }
+};

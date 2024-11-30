@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import router from "next/router";
+import { toast, ToastContainer } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const Pengembalian: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -11,21 +15,22 @@ const Pengembalian: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [kondisiMobil, setKondisiMobil] = useState<string>("aman");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Untuk menandakan jika pengembalian sedang diproses
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false); // Modal Detail
 
   // Fetch data booking ketika komponen pertama kali di-render
   useEffect(() => {
-    let isMounted = true; // Untuk menghindari memory leaks
+    let isMounted = true;
 
     const fetchBookings = async () => {
       try {
         setLoading(true);
         const response = await axios.get("http://localhost:2500/api/booking");
 
-        // Filter booking hanya dengan status 'approved' atau 'sudah dikembalikan'
         if (isMounted) {
-          const filteredBookings = response.data.data.filter((booking: any) => 
-            booking.status === "approved" || booking.pengembalian
+          const filteredBookings = response.data.data.filter(
+            (booking: any) => booking.status === "approved" || booking.pengembalian
           );
           setBookings(filteredBookings);
         }
@@ -40,7 +45,7 @@ const Pengembalian: React.FC = () => {
     fetchBookings();
 
     return () => {
-      isMounted = false; // Cleanup
+      isMounted = false;
     };
   }, []);
 
@@ -49,35 +54,74 @@ const Pengembalian: React.FC = () => {
     setShowModal(true);
   };
 
-  // Kirim request pengembalian ke backend
   const handlePengembalian = async () => {
     if (!selectedBooking) return;
 
-    setIsSubmitting(true); // Menandakan bahwa pengembalian sedang diproses
+    setIsSubmitting(true);
 
     try {
-      // Kirim request pengembalian dengan kondisi mobil
       await axios.post("http://localhost:2500/api/pengembalian", {
         bookingId: selectedBooking.id,
         kondisiMobil,
       });
 
-      // Fetch ulang data bookings
       const response = await axios.get("http://localhost:2500/api/booking");
-      const filteredBookings = response.data.data.filter((booking: any) => 
-        booking.status === "approved" || booking.pengembalian
+      const filteredBookings = response.data.data.filter(
+        (booking: any) => booking.status === "approved" || booking.pengembalian
       );
       setBookings(filteredBookings);
 
-      setShowModal(false); // Tutup modal
-      setSelectedBooking(null); // Clear selected booking
+      setShowModal(false);
+      setSelectedBooking(null);
     } catch (err: any) {
       console.error("Gagal menyimpan pengembalian:", err);
       setError(`Gagal menyimpan pengembalian: ${err.response?.data?.message || err.message}`);
     } finally {
-      setIsSubmitting(false); // Selesai memproses pengembalian
+      setIsSubmitting(false);
     }
   };
+
+  const handleDetailClick = (booking: any) => {
+    setSelectedBooking(booking);
+    setShowDetailModal(true);
+  };
+
+  const handleReturnCar = async (booking: any) => {
+    try {
+      // Kirim permintaan DELETE ke backend
+      await axios.delete(`http://localhost:2500/api/booking/${booking.id}`);
+
+      // Perbarui daftar booking setelah penghapusan
+      setBookings((prevBookings) => prevBookings.filter((b) => b.id !== booking.id));
+
+      // Tampilkan toast setelah berhasil menghapus
+      toast.success('Booking berhasil dihapus!', {
+        position: "top-right",
+        autoClose: 3000, // Toast akan otomatis menghilang setelah 3 detik
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+    } catch (err: any) {
+      console.error("Gagal menghapus booking:", err);
+      setError(`Gagal menghapus booking: ${err.response?.data?.message || err.message}`);
+
+      // Tampilkan toast jika terjadi error
+      toast.error('Gagal menghapus booking!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+    }
+  };
+
+
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -117,29 +161,40 @@ const Pengembalian: React.FC = () => {
                   </td>
                   <td className="border px-4 py-2">
                     <span
-                      className={`inline-block px-2 rounded-md font-bold ${
-                        !booking.pengembalian
-                          ? "bg-red-500 text-white"
-                          : "bg-green-500 text-white"
-                      }`}
+                      className={`inline-block px-2 rounded-md ${!booking.pengembalian
+                        ? "bg-red-500 text-white"
+                        : "bg-green-500 text-white"
+                        }`}
                     >
                       {!booking.pengembalian
                         ? "belum dikembalikan"
-                        : `sudah dikembalikan ${new Date(booking.tglSelesai).toLocaleDateString()}`}
+                        : `sudah dikembalikan (${new Date(booking.pengembalian.tanggalPengembalian).toLocaleDateString()})`}
                     </span>
                   </td>
                   <td className="border px-4 py-2">
+                    <div className="flex space-x-2">
                     {booking.status === "approved" && !booking.pengembalian && (
                       <button
                         onClick={() => handleKembalikanClick(booking)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-sm"
+                        className="bg-blue-500 text-white px-4 py-1 rounded-md mb-1"
                       >
                         Kembalikan
                       </button>
                     )}
-                    {booking.status !== "approved" && !booking.pengembalian && (
-                      <span className="text-gray-500">Tidak dapat dikembalikan</span>
-                    )}
+                    <button
+                      onClick={() => handleDetailClick(booking)}
+                      className="bg-blue-400 text-white px-4 py-1 rounded-md mb-1 mr-2"
+                    >
+                      <FontAwesomeIcon icon={faInfoCircle} />
+                    </button>
+                    <button
+                      onClick={() => handleReturnCar(booking)}
+                      className="bg-red-500 text-white px-4 py-1  rounded-md mb-1"
+                    >
+                   
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -160,7 +215,6 @@ const Pengembalian: React.FC = () => {
                 >
                   <option value="aman">Aman</option>
                   <option value="rusak">Rusak</option>
-                  <option value="hilang">Hilang</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-2">
@@ -178,6 +232,28 @@ const Pengembalian: React.FC = () => {
                   Batal
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {showDetailModal && selectedBooking && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-md shadow-md max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4">Detail </h2>
+              <p><strong>ID:</strong> {selectedBooking.id}</p>
+              <p><strong>Nama Pengguna:</strong> {selectedBooking.pengguna.nama}</p>
+              <p><strong>Mobil:</strong> {selectedBooking.mobil.namaMobil}</p>
+              <p><strong>Tanggal Booking:</strong> {new Date(selectedBooking.tglBooking).toLocaleDateString()}</p>
+              <p><strong>Tanggal Mulai:</strong> {new Date(selectedBooking.tglMulai).toLocaleDateString()}</p>
+              <p><strong>Tanggal Selesai:</strong> {new Date(selectedBooking.tglSelesai).toLocaleDateString()}</p>
+              <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p>
+              <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         )}

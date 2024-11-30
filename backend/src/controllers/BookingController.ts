@@ -105,3 +105,4 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
     return res.status(500).json({ success: false, message: (error as Error).message || "Terjadi kesalahan saat mengupdate status booking." });
   }
 };
+

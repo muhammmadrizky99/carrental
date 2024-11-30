@@ -80,6 +80,26 @@ const StatusBooking: React.FC = () => {
     }
   };
 
+  const handleDeleteBooking = async (id: number) => {
+    try {
+      const response = await fetch(`/api/booking/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+  
+      if (data.success) {
+        alert(data.message); // Menampilkan pesan sukses
+        // Lakukan pembaruan pada UI, misalnya menghapus booking dari daftar
+        setBookings(prevBookings => prevBookings.filter(booking => booking.id !== id));
+      } else {
+        alert(data.message); // Menampilkan pesan error jika ada masalah
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat menghapus booking.");
+    }
+  };
+  
+
 
   if (loading) return <p>Loading booking data...</p>;
   if (error) return <p>{error}</p>;

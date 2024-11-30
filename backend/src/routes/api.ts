@@ -6,7 +6,7 @@ import { deleteMobil, editMobil, idMobil, mobil, MobilController, semuaMobil, ti
 import { createBooking, getBookings, updateBookingStatus } from '../controllers/BookingController';
 import { uploadFile } from '../middleware/multerUpload';
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from '../controllers/UserController';
-import { pengembalianMobil } from '../controllers/PengembalianController';
+import { deleteBooking, getApprovedBookingsForReturn, pengembalianMobil } from '../controllers/PengembalianController';
 
 
 const router = express.Router();
@@ -25,6 +25,7 @@ router.get("/booking", getBookings);
 router.post("/booking", createBooking);
 router.put("/booking/:id", updateBookingStatus);
 
+
 router.get('/mobil/tahun/:tahun', mobil );
 router.get('/mobil/tipe', tipeMobil);
 router.get('/mobil/:id', idMobil);
@@ -37,6 +38,8 @@ router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser); 
 
 router.post("/pengembalian", pengembalianMobil);
+router.get("/pengembalian", getApprovedBookingsForReturn);
+router.delete("/booking/:id", deleteBooking);
 
 
 export default router;
