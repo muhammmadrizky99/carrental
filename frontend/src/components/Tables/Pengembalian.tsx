@@ -246,8 +246,16 @@ const Pengembalian: React.FC = () => {
               <p><strong>Tanggal Booking:</strong> {new Date(selectedBooking.tglBooking).toLocaleDateString()}</p>
               <p><strong>Tanggal Mulai:</strong> {new Date(selectedBooking.tglMulai).toLocaleDateString()}</p>
               <p><strong>Tanggal Selesai:</strong> {new Date(selectedBooking.tglSelesai).toLocaleDateString()}</p>
-              <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p>
-              <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p>
+              {/* <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p> */}
+              {/* <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p> */}
+              {selectedBooking.pengembalian ? (
+                <>
+                <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p>
+                <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p>
+                </>
+              ) : (
+                <p><strong>Status Pengembalian:</strong> Belum dikembalikan</p>
+              )}
               <button
                 onClick={() => setShowDetailModal(false)}
                 className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"

@@ -70,11 +70,21 @@ export const pengembalianMobil = async (req: Request, res: Response) => {
         },
       });
 
-      // Update status booking menjadi 'selesai' jika pengembalian diterima
+      // Update status booking menjadi 'selesai' 
       await prisma.booking.update({
         where: { id: bookingId },
         data: {
           status: "selesai", // Atau status lain yang relevan untuk pengembalian
+        },
+      });
+
+      // Update stok mobil setelah pengembalian
+      const mobil = await prisma.mobil.update({
+        where: { id: booking.mobilId },
+        data: {
+          stok: {
+            increment: 1,  // Menambah 1 ke stok mobil yang dikembalikan
+          },
         },
       });
 

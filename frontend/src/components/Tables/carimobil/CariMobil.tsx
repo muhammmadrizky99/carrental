@@ -11,6 +11,7 @@ interface Mobil {
   transmisi: string;
   tahun: number;
   gambar: string;
+  stok: number;
 }
 
 const CariMobil: React.FC = () => {
@@ -122,9 +123,6 @@ const CariMobil: React.FC = () => {
     //   fetchMobilByTahun(String(filters.tahun)); // Ambil data berdasarkan tahun
     // }
   }, [filters.tahun]);
-
-
-
 
 
   // Fungsi untuk menangani perubahan filter
@@ -307,7 +305,7 @@ const CariMobil: React.FC = () => {
                 className="w-full h-40 object-cover rounded-md mb-4"
               />
               <h4 className="text-lg font-bold mb-2">{car.namaMobil}</h4>
-              <p className="text-sm text-gray-600 mb-2">{car.tipe}</p>
+              <p className="text-sm text-gray-600 mb-2">Tipe : {car.tipe}</p>
               <p className="text-sm text-gray-800 font-bold mb-2">Rp {car.harga}/day</p>
               <p className="text-sm text-gray-600 mb-4">{car.tahun} - {car.transmisi}</p>
               {/* <button 
@@ -315,12 +313,17 @@ const CariMobil: React.FC = () => {
               onClick={() => window.location.href = `/detailsewa/${car.id}`}>
                 Sewa Sekarang
               </button> */}
+              <div className="flex items-center justify-between mt-2">
+                <Link href={`/umum/detailsewa/${car.id}`}>
+                  <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">
+                    Sewa Sekarang
+                  </button>
+                </Link>
+                <p className="font-bold bg-gray-400 text-white inline-block px-2 rounded-md  mb-2 mt-3 ">
+                  Stok : {car.stok}
+                </p>
 
-              <Link href={`/umum/detailsewa/${car.id}`}>
-                <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">
-                  Sewa Sekarang
-                </button>
-              </Link>
+              </div>
             </div>
           ))
         ) : (

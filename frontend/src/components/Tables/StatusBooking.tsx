@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const StatusBooking: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -82,23 +83,36 @@ const StatusBooking: React.FC = () => {
 
   const handleDeleteBooking = async (id: number) => {
     try {
-      const response = await fetch(`/api/booking/${id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json();
-  
-      if (data.success) {
-        alert(data.message); // Menampilkan pesan sukses
-        // Lakukan pembaruan pada UI, misalnya menghapus booking dari daftar
-        setBookings(prevBookings => prevBookings.filter(booking => booking.id !== id));
-      } else {
-        alert(data.message); // Menampilkan pesan error jika ada masalah
-      }
-    } catch (error) {
-      alert("Terjadi kesalahan saat menghapus booking.");
+      const response = await axios.delete(`http://localhost:2500/api/booking/${id}`);
+      Swal.fire("","Data booking berhasil dihapus.","success");
+
+      setBookings((prevBookings) =>
+      prevBookings.filter((booking) => booking.id !== id)
+    );
+         
+    }catch (error) {
+      Swal.fire("","Gagal menghapus data booking.","error");
+      console.error(error);
     }
   };
-  
+
+  const handleDeleteConfirmation = (id: number) => {
+    Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Data booking ini akan dihapus dan tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleDeleteBooking(id);
+      }
+    });
+  };
+
 
 
   if (loading) return <p>Loading booking data...</p>;
@@ -156,13 +170,16 @@ const StatusBooking: React.FC = () => {
                         </button>
                       ) : (
                         <span
-                          className={`inline-block px-3  rounded-md  ${booking.status === "approved"
-                              ? "bg-green-500 text-white"
-                              : booking.status === "rejected"
-                                ? "bg-red-500 text-white"
-                                : booking.status === "selesai"
-                                  ? "bg-blue-500 text-white"
-                                  : ""
+                          onClick={() =>
+                            booking.status === "rejected" && handleDeleteConfirmation(booking.id)
+                          }
+                          className={`inline-block px-3 cursor-pointer rounded-md  ${booking.status === "approved"
+                            ? "bg-green-500 text-white"
+                            : booking.status === "rejected"
+                              ? "bg-red-500 text-white"
+                              : booking.status === "selesai"
+                                ? "bg-blue-500 text-white"
+                                : ""
                             }`}
                         >
                           {booking.status === "approved"

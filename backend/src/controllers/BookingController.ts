@@ -6,8 +6,8 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
   try {
     const bookings = await prisma.booking.findMany({
       include: { 
-        mobil: true,  // Pastikan 'mobil' sesuai dengan nama relasi dalam model Prisma Anda
-        pengguna: true,  // Perbaiki dari 'users' menjadi 'pengguna' jika model Anda menggunakan 'pengguna'
+        mobil: true,  
+        pengguna: true,  
         pengembalian: true
       },
     });
@@ -52,6 +52,11 @@ export const createBooking = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Mobil tidak ditemukan." });
     }
 
+    // Cek apakah stok mobil mencukupi
+    if (mobil.stok <= 0) {
+      return res.status(400).json({ success: false, message: "Stok mobil tidak tersedia." });
+    }
+
     // Buat booking baru
     const newBooking = await prisma.booking.create({
       data: {
@@ -61,6 +66,12 @@ export const createBooking = async (req: Request, res: Response) => {
         penggunaId: parseInt(penggunaId, 10),
         mobilId: parseInt(mobilId, 10),
       },
+    });
+
+     // Kurangi stok 
+     await prisma.mobil.update({
+      where: { id: parseInt(mobilId, 10) },
+      data: { stok: mobil.stok - 1 },
     });
 
     res.status(201).json({ success: true, data: newBooking });

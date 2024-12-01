@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import Swal from "sweetalert2";
 
 const DetailSewa: React.FC = () => {
   const { id } = useParams(); // Ambil ID dari URL
@@ -11,7 +12,12 @@ const DetailSewa: React.FC = () => {
   const [mobil, setMobil] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [bookingDetails, setBookingDetails] = useState<any>({});
+  const [bookingDetails, setBookingDetails] = useState<any>({
+    namaPemesan: "",
+    tglMulai: "",
+    tglSelesai: "",
+    noHp: "",
+  });
 
   // Default tanggal
   const currentDate = new Date().toISOString().split("T")[0];
@@ -65,11 +71,31 @@ const DetailSewa: React.FC = () => {
 
     try {
       const response = await axios.post("http://localhost:2500/api/booking", newBooking);
-      alert("Booking berhasil dikirim!");
+      Swal.fire({
+        title: "Booking berhasil!",
+        text: "Terima kasih telah melakukan pemesanan.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      // Update stok mobil
+      setMobil((prevMobil: any) => ({
+        ...prevMobil,
+        stok: prevMobil.stok - 1,
+      }));
+
+      // Reset form setelah berhasil booking
+      setBookingDetails({
+        namaPemesan: "",
+        tglMulai: "",
+        tglSelesai: "",
+        noHp: "",
+      });
+
       console.log(response.data);
     } catch (error) {
       console.error("Gagal mengirim booking:", error);
-      alert("Gagal mengirim booking. Coba lagi nanti.");
+      alert("Gagal mengirim booking. Coba periksa stok mobil.");
     }
   };
 
@@ -87,6 +113,9 @@ const DetailSewa: React.FC = () => {
         <p>Harga: Rp {mobil.harga}/day</p>
         <p>Transmisi: {mobil.transmisi}</p>
         <p>Tahun: {mobil.tahun}</p>
+        <p className="font-bold bg-orange-700 text-white inline-block px-2  rounded-md  mb-2 mt-5">
+          Stok: {mobil.stok}
+        </p>
         <div className="mt-6">
           <h2 className="text-xl font-bold mb-2">Form Booking</h2>
           <form onSubmit={handleBookingSubmit}>
@@ -95,6 +124,7 @@ const DetailSewa: React.FC = () => {
               <input
                 type="text"
                 className="border p-2 w-full rounded-md"
+                value={bookingDetails.namaPemesan}
                 required
                 onChange={(e) =>
                   setBookingDetails({ ...bookingDetails, namaPemesan: e.target.value })
@@ -115,6 +145,7 @@ const DetailSewa: React.FC = () => {
               <input
                 type="date"
                 className="border p-2 w-full rounded-md"
+                value={bookingDetails.tglMulai}
                 required
                 onChange={(e) =>
                   setBookingDetails({ ...bookingDetails, tglMulai: e.target.value })
@@ -126,6 +157,7 @@ const DetailSewa: React.FC = () => {
               <input
                 type="date"
                 className="border p-2 w-full rounded-md"
+                value={bookingDetails.tglSelesai}
                 required
                 onChange={(e) =>
                   setBookingDetails({ ...bookingDetails, tglSelesai: e.target.value })
@@ -137,6 +169,7 @@ const DetailSewa: React.FC = () => {
               <input
                 type="number"
                 className="border p-2 w-full rounded-md"
+                value={bookingDetails.noHp}
                 required
                 onChange={(e) =>
                   setBookingDetails({ ...bookingDetails, noHp: e.target.value })
