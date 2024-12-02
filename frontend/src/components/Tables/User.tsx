@@ -6,8 +6,11 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faTrash, faPencil } from "@fortawesome/free-solid-svg-icons";
 import 'tailwindcss/tailwind.css';
+import { api } from "@/lib/api";
 
 const TableUser = () => {
+const token = localStorage.getItem("token");
+console.log(token);
 
   const [users, setUsers] = useState<any[]>([]);
   const [newUser, setNewUser] = useState({
@@ -24,7 +27,7 @@ const TableUser = () => {
   // Fetch data from API
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:2500/api/users');
+      const response = await api.get('/api/users');
       setUsers(response.data.data);
     } catch (error) {
       console.log("Error fetching data: ", error);
@@ -47,7 +50,7 @@ const TableUser = () => {
   const handleAddUser = async () => {
     try {
       console.log("Data yang dikirim:", newUser); // Log the user data
-      const response = await axios.post("http://localhost:2500/api/users", newUser);
+      const response = await api.post("/api/users", newUser);
       toast.success("User berhasil ditambahkan");
       fetchUsers();  // Refresh data
       setModalOpen(false);  // Close modal
@@ -75,7 +78,7 @@ const TableUser = () => {
   const handleSaveEdit = async () => {
     if (editIndex !== null) {
       try {
-        const response = await axios.put(`http://localhost:2500/api/users/${users[editIndex].id}`, newUser);
+        const response = await api.put(`/api/users/${users[editIndex].id}`, newUser);
         toast.success("User berhasil diperbarui");
         fetchUsers();  // Refresh data
         setModalOpen(false);  // Close modal
@@ -92,7 +95,7 @@ const TableUser = () => {
   // Delete user
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:2500/api/users/${id}`);
+      await api.delete(`/api/users/${id}`);
       toast.success("User berhasil dihapus");
       fetchUsers();  // Refresh data
     } catch (error) {
@@ -132,9 +135,9 @@ const TableUser = () => {
         <div className="col-span-2 flex items-center text-black px-2 -ml-5">
           <p className="font-medium">Email</p>
         </div>
-        <div className="col-span-2 flex items-center text-black -ml-10">
+        {/* <div className="col-span-2 flex items-center text-black -ml-10">
           <p className="font-medium">Status</p>
-        </div>
+        </div> */}
         <div className="col-span-1 flex items-center text-black -ml-11">
           <p className="font-medium">Role</p>
         </div>
@@ -160,11 +163,11 @@ const TableUser = () => {
               {user.email}
             </p>
           </div>
-          <div className="col-span-2 flex items-center -ml-8">
+          {/* <div className="col-span-2 flex items-center -ml-8">
             <p className="text-sm text-black dark:text-white">
               {user.status}
             </p>
-          </div>
+          </div> */}
           <div className="col-span-1 flex items-center -ml-8">
             <p className="text-sm text-black dark:text-white">
               {user.role}

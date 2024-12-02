@@ -11,6 +11,7 @@ import { faPencil } from "@fortawesome/free-solid-svg-icons/faPencil";
 import 'tailwindcss/tailwind.css';
 import { headers } from "next/headers";
 import DetailMobil from "./DetailMobil";
+import { api } from "@/lib/api";
 
 
 
@@ -35,7 +36,8 @@ const TableTwo = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:2500/api/mobil');
+      const response = await api.get('/api/mobil');
+      // const response = await api.get('/api/mobil');
       setData(response.data.data);
     } catch (error) {
       console.log("Error fetching data: ", error);
@@ -107,7 +109,7 @@ const TableTwo = () => {
   const handleAddProduct = async () => {
     try {
       console.log("Sending product data: ", newProduct);
-      const response = await axios.post("http://localhost:2500/api/mobil", {
+      const response = await api.post("/api/mobil", {
         headers: { "Content-Type": "multipart/form-data" },
         gambar: newProduct.gambar,
         namaMobil: newProduct.namaMobil,
@@ -156,7 +158,7 @@ const TableTwo = () => {
     if (editIndex !== null) {
       try {
         console.log("Saving edited product at index:", editIndex);
-        const response = await axios.put(`http://localhost:2500/api/mobil/${data[editIndex].id}`, newProduct);
+        const response = await api.put(`/api/mobil/${data[editIndex].id}`, newProduct);
         console.log("Produk berhasil diperbarui", response.data);
 
         fetchData();
@@ -175,7 +177,9 @@ const TableTwo = () => {
   //hapus
   const handleDelete = async (id: number, closeToast: () => void) => {
     try {
-      const response = await axios.delete(`http://localhost:2500/api/mobil/${id}`);
+      const response = await api.delete(`/api/mobil/${id}`);
+      console.log(response);
+      
       toast.success("Item berhasil dihapus"); // Menampilkan pesan dari server
       closeToast();
       fetchData();

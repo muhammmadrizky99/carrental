@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { api } from "@/lib/api";
 
 const StatusBooking: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -18,7 +19,7 @@ const StatusBooking: React.FC = () => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:2500/api/booking");
+        const response = await api.get("/api/booking");
         if (isMounted) setBookings(response.data.data);
       } catch (err) {
         console.error("Gagal mengambil data booking:", err);
@@ -44,12 +45,12 @@ const StatusBooking: React.FC = () => {
   const handleApprove = async () => {
     if (selectedBooking) {
       try {
-        await axios.put(`http://localhost:2500/api/booking/${selectedBooking.id}`, {
+        await api.put(`/api/booking/${selectedBooking.id}`, {
           status: "approved",
         });
 
         // Fetch ulang data bookings
-        const response = await axios.get("http://localhost:2500/api/booking");
+        const response = await api.get("/api/booking");
         setBookings(response.data.data);
 
         setShowModal(false); // Tutup modal
@@ -64,12 +65,12 @@ const StatusBooking: React.FC = () => {
   const handleReject = async () => {
     if (selectedBooking) {
       try {
-        await axios.put(`http://localhost:2500/api/booking/${selectedBooking.id}`, {
+        await api.put(`/api/booking/${selectedBooking.id}`, {
           status: "rejected",
         });
 
         // Fetch ulang data bookings
-        const response = await axios.get("http://localhost:2500/api/booking");
+        const response = await api.get("/api/booking");
         setBookings(response.data.data);
 
         setShowModal(false); // Tutup modal
@@ -83,7 +84,7 @@ const StatusBooking: React.FC = () => {
 
   const handleDeleteBooking = async (id: number) => {
     try {
-      const response = await axios.delete(`http://localhost:2500/api/booking/${id}`);
+      const response = await api.delete(`/api/booking/${id}`);
       Swal.fire("","Data booking berhasil dihapus.","success");
 
       setBookings((prevBookings) =>

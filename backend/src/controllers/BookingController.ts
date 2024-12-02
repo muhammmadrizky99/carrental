@@ -68,12 +68,6 @@ export const createBooking = async (req: Request, res: Response) => {
       },
     });
 
-     // Kurangi stok 
-     await prisma.mobil.update({
-      where: { id: parseInt(mobilId, 10) },
-      data: { stok: mobil.stok - 1 },
-    });
-
     res.status(201).json({ success: true, data: newBooking });
   } catch (error) {
     console.error("Detail error:", error);
@@ -100,10 +94,18 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
       where: { id: parseInt(id, 10) },
     });
 
+
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking tidak ditemukan." });
     }
 
+    if(status ==="approved" ){
+           // Kurangi stok 
+     await prisma.mobil.update({
+      where: { id: Number(booking.mobilId) },
+      data: { stok:  {decrement: 1} },
+    });
+    }
     // Update status booking
     const updatedBooking = await prisma.booking.update({
       where: { id: parseInt(id, 10) },

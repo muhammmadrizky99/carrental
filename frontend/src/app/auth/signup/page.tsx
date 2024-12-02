@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { useRouter } from "next/navigation";
 
 
 
@@ -18,6 +19,7 @@ const SignUp: React.FC = () => {
   
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const router = useRouter(); // Router instance
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,7 +44,7 @@ const SignUp: React.FC = () => {
     }
 
     try {
-        const response = await fetch('http://localhost:2500/api/register', { // Pastikan URL sesuai dengan server backend Anda
+        const response = await fetch('http://localhost:2500/api/register', { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -54,7 +56,10 @@ const SignUp: React.FC = () => {
 
         if (response.ok) {
             setSuccessMessage(data.msg);
-            setErrorMessage(""); // clear any errors
+            setErrorMessage("");
+
+        // Arahkan pengguna ke halaman carimobil
+        router.push("/auth/signin");
         } else {
             setErrorMessage(data.msg || "Something went wrong.");
         }
@@ -63,11 +68,9 @@ const SignUp: React.FC = () => {
     }
 };
 
-  
 
   return (
-    <DefaultLayout>
-      <Breadcrumb pageName="Sign Up" />
+  
 
       <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-wrap items-center">
@@ -153,7 +156,7 @@ const SignUp: React.FC = () => {
           </div>
         </div>
       </div>
-    </DefaultLayout>
+
   );
 };
 

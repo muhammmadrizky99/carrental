@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Swal from "sweetalert2";
+import { api } from "@/lib/api";
 
 const DetailSewa: React.FC = () => {
   const { id } = useParams(); // Ambil ID dari URL
@@ -26,7 +27,7 @@ const DetailSewa: React.FC = () => {
     const fetchDetailMobil = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:2500/api/mobil/${id}`);
+        const response = await api.get(`/api/mobil/${id}`);
         setMobil(response.data.data);
       } catch (error) {
         console.error("Gagal mengambil data mobil:", error);
@@ -59,30 +60,26 @@ const DetailSewa: React.FC = () => {
       return;
     }
 
+    const userID = localStorage.getItem("userID")
+
     const newBooking = {
       tglMulai: bookingDetails.tglMulai,
       tglSelesai: bookingDetails.tglSelesai,
       noHp: bookingDetails.noHp.toString(), // Konversi ke string
-      penggunaId: 1, // Simulasi pengguna ID
+      penggunaId: userID, // Simulasi pengguna ID
       mobilId: parseInt(mobil.id, 10), // Pastikan ini angka
     };
 
     console.log("Payload dikirim:", newBooking);
 
     try {
-      const response = await axios.post("http://localhost:2500/api/booking", newBooking);
+      const response = await api.post("/api/booking", newBooking);
       Swal.fire({
         title: "Booking berhasil!",
-        text: "Terima kasih telah melakukan pemesanan.",
+        text: "Silahkan lanjutkan transaksi pembayaran.",
         icon: "success",
         confirmButtonText: "OK",
       });
-
-      // Update stok mobil
-      setMobil((prevMobil: any) => ({
-        ...prevMobil,
-        stok: prevMobil.stok - 1,
-      }));
 
       // Reset form setelah berhasil booking
       setBookingDetails({

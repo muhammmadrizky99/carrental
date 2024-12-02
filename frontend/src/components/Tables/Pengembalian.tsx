@@ -6,6 +6,7 @@ import router from "next/router";
 import { toast, ToastContainer } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { api } from "@/lib/api";
 
 const Pengembalian: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -26,7 +27,7 @@ const Pengembalian: React.FC = () => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:2500/api/booking");
+        const response = await api.get("/api/booking");
 
         if (isMounted) {
           const filteredBookings = response.data.data.filter(
@@ -60,12 +61,12 @@ const Pengembalian: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await axios.post("http://localhost:2500/api/pengembalian", {
+      await api.post("/api/pengembalian", {
         bookingId: selectedBooking.id,
         kondisiMobil,
       });
 
-      const response = await axios.get("http://localhost:2500/api/booking");
+      const response = await api.get("/api/booking");
       const filteredBookings = response.data.data.filter(
         (booking: any) => booking.status === "approved" || booking.pengembalian
       );
@@ -89,7 +90,7 @@ const Pengembalian: React.FC = () => {
   const handleReturnCar = async (booking: any) => {
     try {
       // Kirim permintaan DELETE ke backend
-      await axios.delete(`http://localhost:2500/api/booking/${booking.id}`);
+      await api.delete(`/api/booking/${booking.id}`);
 
       // Perbarui daftar booking setelah penghapusan
       setBookings((prevBookings) => prevBookings.filter((b) => b.id !== booking.id));

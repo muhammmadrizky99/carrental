@@ -1,4 +1,5 @@
 "use client"
+import { api } from '@/lib/api';
 import axios from 'axios';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -41,7 +42,7 @@ const CariMobil: React.FC = () => {
   const fetchAllCars = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:2500/api/mobil");
+      const response = await api.get("/api/mobil");
       console.log(response.data);
 
       // if (!response.ok) throw new Error("Gagal mengambil data mobil");

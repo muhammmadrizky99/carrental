@@ -2,6 +2,10 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+// Secret key untuk JWT
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 // Fungsi untuk registrasi pengguna
 export const RegisterController = async (req: Request, res: Response) => {
@@ -34,7 +38,8 @@ export const RegisterController = async (req: Request, res: Response) => {
             statusCode: 201,
             msg: "User registered successfully",
             data: {
-                email: newUser.email, 
+                email: newUser.email,
+                role: newUser.role,
             }
         });
     } catch (error) {

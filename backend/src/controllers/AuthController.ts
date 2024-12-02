@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prm from '../config/database';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export const LoginController = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -28,11 +29,14 @@ export const LoginController = async (req: Request, res: Response): Promise<Resp
             });
         }
 
+        const token = jwt.sign({user}, "sdhfkhskhfkj-wejtrhwejt-ertj", {expiresIn: "1d"})
+
         // Jika login berhasil
         return res.status(200).json({
             statusCode: 200,
             msg: "Login successful",
-            data: { email },  // Anda bisa menambahkan data lain seperti nama atau token jika diperlukan
+            data: user,  // Anda bisa menambahkan data lain seperti nama atau token jika diperlukan
+            token: token
         });
 
     } catch (error) {
