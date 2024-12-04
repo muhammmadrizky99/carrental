@@ -1,24 +1,37 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Swal from "sweetalert2";
+import { api } from "@/lib/api";
 
 const PesananSaya: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  const [showModal, setShowModal] = useState<boolean>(false); // Untuk modal
-  const [selectedBooking, setSelectedBooking] = useState<any>(null); // Booking yang dipilih
+  const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+
+  const [paymentData, setPaymentData] = useState<{
+    tglPembayaran: string;
+    metodePembayaran: string;
+    jumlah: string;
+    keterangan: string;
+    buktiPembayaran: File | null;
+  }>({
+    tglPembayaran: "",
+    metodePembayaran: "transfer bank",
+    jumlah: "",
+    keterangan: "",
+    buktiPembayaran: null,
+  });
 
   useEffect(() => {
-    let isMounted = true; // Untuk menghindari memory leaks
+    let isMounted = true;
 
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:2500/api/booking");
+        const response = await api.get("/api/booking");
         if (isMounted) setBookings(response.data.data);
       } catch (err) {
         console.error("Gagal mengambil data booking:", err);
@@ -31,89 +44,49 @@ const PesananSaya: React.FC = () => {
     fetchBookings();
 
     return () => {
-      isMounted = false; // Cleanup
+      isMounted = false;
     };
   }, []);
 
-
-  const handlePendingClick = (booking: any) => {
+  const handlePaymentClick = (booking: any) => {
     setSelectedBooking(booking);
-    setShowModal(true); // Tampilkan modal ketika tombol di status pending diklik
-  };
-
-  const handleApprove = async () => {
-    if (selectedBooking) {
-      try {
-        await axios.put(`http://localhost:2500/api/booking/${selectedBooking.id}`, {
-          status: "approved",
-        });
-
-        // Fetch ulang data bookings
-        const response = await axios.get("http://localhost:2500/api/booking");
-        setBookings(response.data.data);
-
-        setShowModal(false); // Tutup modal
-        setSelectedBooking(null);
-      } catch (err) {
-        console.error("Gagal menyetujui booking:", err);
-        setError("Gagal menyetujui booking.");
-      }
-    }
-  };
-
-  const handleReject = async () => {
-    if (selectedBooking) {
-      try {
-        await axios.put(`http://localhost:2500/api/booking/${selectedBooking.id}`, {
-          status: "rejected",
-        });
-
-        // Fetch ulang data bookings
-        const response = await axios.get("http://localhost:2500/api/booking");
-        setBookings(response.data.data);
-
-        setShowModal(false); // Tutup modal
-        setSelectedBooking(null);
-      } catch (err) {
-        console.error("Gagal menolak booking:", err);
-        setError("Gagal menolak booking.");
-      }
-    }
-  };
-
-  const handleDeleteBooking = async (id: number) => {
-    try {
-      const response = await axios.delete(`http://localhost:2500/api/booking/${id}`);
-      Swal.fire("","Data booking berhasil dihapus.","success");
-
-      setBookings((prevBookings) =>
-      prevBookings.filter((booking) => booking.id !== id)
-    );
-         
-    }catch (error) {
-      Swal.fire("","Gagal menghapus data booking.","error");
-      console.error(error);
-    }
-  };
-
-  const handleDeleteConfirmation = (id: number) => {
-    Swal.fire({
-      title: "Apakah Anda yakin?",
-      text: "Data booking ini akan dihapus dan tidak dapat dikembalikan!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        handleDeleteBooking(id);
-      }
+    setPaymentData({
+      tglPembayaran: "",
+      metodePembayaran: "transfer bank",
+      jumlah: "",
+      keterangan: "",
+      buktiPembayaran: null,
     });
+    setShowPaymentModal(true);
   };
 
+  const handlePaymentSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("bookingId", selectedBooking.id.toString());
+      formData.append("tglPembayaran", paymentData.tglPembayaran);
+      formData.append("metodePembayaran", paymentData.metodePembayaran);
+      formData.append("jumlahPembayaran", paymentData.jumlah);
+      formData.append("keterangan", paymentData.keterangan);
+      if (paymentData.buktiPembayaran) {
+        formData.append("buktiPembayaran", paymentData.buktiPembayaran);
+      }
+      await api.post(`/api/pembayaran`, formData);
 
+      // Refresh data bookings tanpa merubah data booking
+      const response = await api.get("/api/booking");
+      setBookings(response.data.data);
+
+      // Set the selected booking's payment status to "Pembayaran Selesai"
+      setShowPaymentModal(false);
+      setSelectedBooking(null);
+
+      alert("Pembayaran berhasil!");
+    } catch (err) {
+      console.error("Gagal memproses pembayaran:", err);
+      alert("Gagal memproses pembayaran.");
+    }
+  };
 
   if (loading) return <p>Loading booking data...</p>;
   if (error) return <p>{error}</p>;
@@ -129,31 +102,17 @@ const PesananSaya: React.FC = () => {
               <thead className="bg-gray-100 text-left">
                 <tr>
                   <th className="px-4 py-2">Mobil</th>
-                  <th className="px-4 py-2">Nama</th>
-                  <th className="px-4 py-2">Tanggal Booking</th>
                   <th className="px-4 py-2">Tanggal Mulai</th>
                   <th className="px-4 py-2">Tanggal Selesai</th>
-                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Status Pesanan</th>
                   <th className="px-4 py-2">Harga</th>
+                  <th className="px-4 py-2">Pembayaran</th>
                 </tr>
               </thead>
               <tbody>
                 {bookings.map((booking) => (
                   <tr key={booking.id} className="border-b">
-                    <td className="px-4 py-2">
-                      <div className="flex items-center">
-                        <img
-                          src={booking.mobil.gambar}
-                          alt={booking.mobil.namaMobil}
-                          className="w-16 h-16 object-cover mr-2"
-                        />
-                        {booking.mobil.namaMobil}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2">{booking.pengguna.nama}</td>
-                    <td className="px-4 py-2">
-                      {new Date(booking.tglBooking).toLocaleDateString()}
-                    </td>
+                    <td className="px-4 py-2">{booking.mobil.namaMobil}</td>
                     <td className="px-4 py-2">
                       {new Date(booking.tglMulai).toLocaleDateString()}
                     </td>
@@ -161,41 +120,33 @@ const PesananSaya: React.FC = () => {
                       {new Date(booking.tglSelesai).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2">
-                      {booking.status === "pending" ? (
-                        <button
-                          className="px-3 bg-yellow-500 text-white rounded-md"
-                          onClick={() => handlePendingClick(booking)}
-                        >
-                          Pending
-                        </button>
-                      ) : (
-                        <span
-                          onClick={() =>
-                            booking.status === "rejected" && handleDeleteConfirmation(booking.id)
-                          }
-                          className={`inline-block px-3 cursor-pointer rounded-md  ${booking.status === "approved"
-                            ? "bg-green-500 text-white"
-                            : booking.status === "rejected"
-                              ? "bg-red-500 text-white"
-                              : booking.status === "selesai"
-                                ? "bg-blue-500 text-white"
-                                : ""
-                            }`}
-                        >
-                          {booking.status === "approved"
-                            ? "Approved"
-                            : booking.status === "rejected"
-                              ? "Rejected"
-                              : booking.status === "selesai"
-                                ? "Selesai"
-                                : ""}
-                        </span>
-                      )}
+                      <span className="px-3 bg-gray-300 text-gray-700 rounded-md">
+                        {booking.status}
+                      </span>
                     </td>
-
-
                     <td className="px-4 py-2">
                       Rp {booking.mobil.harga.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      {booking.statusPembayaran === "Pembayaran Berhasil" ? (
+                        <span className="px-3 bg-green-500 text-white rounded-md">
+                          Pembayaran Selesai
+                        </span>
+                      ) : (
+                        <button
+                          className={`px-3 text-white rounded-md ${
+                            booking.statusPembayaran === "Pembayaran Berhasil"
+                              ? "bg-green-500"
+                              : "bg-yellow-500"
+                          }`}
+                          onClick={() => handlePaymentClick(booking)}
+                          disabled={booking.statusPembayaran === "Pembayaran Berhasil"}
+                        >
+                          {booking.statusPembayaran === "Pembayaran Berhasil"
+                            ? "Pembayaran Selesai"
+                            : "Pembayaran"}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -205,28 +156,74 @@ const PesananSaya: React.FC = () => {
         )}
       </div>
 
-      {/* Modal */}
-      {showModal && (
+      {/* Modal Pembayaran */}
+      {showPaymentModal && selectedBooking && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-lg font-bold">Tindak Lanjut Booking</h2>
-            <p className="mt-4">Apakah Anda ingin menyetujui atau menolak booking ini?</p>
+            <h2 className="text-lg font-bold">Form Pembayaran</h2>
+            <div className="mt-4">
+              <label>Tanggal Pembayaran</label>
+              <input
+                type="date"
+                className="w-full mt-2 mb-4 p-2 border"
+                value={paymentData.tglPembayaran}
+                onChange={(e) =>
+                  setPaymentData({ ...paymentData, tglPembayaran: e.target.value })
+                }
+              />
+              <label>Metode Pembayaran</label>
+              <select
+                className="w-full mt-2 mb-4 p-2 border"
+                value={paymentData.metodePembayaran}
+                onChange={(e) =>
+                  setPaymentData({
+                    ...paymentData,
+                    metodePembayaran: e.target.value,
+                  })
+                }
+              >
+                <option value="transfer bank">Transfer Bank</option>
+                <option value="cash">Cash</option>
+              </select>
+              <label>Jumlah</label>
+              <input
+                type="number"
+                className="w-full mt-2 mb-4 p-2 border"
+                value={paymentData.jumlah}
+                onChange={(e) =>
+                  setPaymentData({ ...paymentData, jumlah: e.target.value })
+                }
+              />
+              <label>Keterangan</label>
+              <textarea
+                className="w-full mt-2 mb-4 p-2 border"
+                value={paymentData.keterangan}
+                onChange={(e) =>
+                  setPaymentData({ ...paymentData, keterangan: e.target.value })
+                }
+              ></textarea>
+              <label>Upload Bukti Pembayaran</label>
+              <input
+                type="file"
+                className="w-full mt-2 mb-4 p-2 border"
+                onChange={(e) =>
+                  setPaymentData({
+                    ...paymentData,
+                    buktiPembayaran: e.target.files ? e.target.files[0] : null,
+                  })
+                }
+              />
+            </div>
             <div className="mt-6 flex justify-around">
               <button
-                className="px-4 py-2 bg-green-500 text-white rounded"
-                onClick={handleApprove}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={handlePaymentSubmit}
               >
-                Approve
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
-                onClick={handleReject}
-              >
-                Reject
+                Bayar
               </button>
               <button
                 className="px-4 py-2 bg-gray-500 text-white rounded"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowPaymentModal(false)}
               >
                 Tutup
               </button>
@@ -239,3 +236,4 @@ const PesananSaya: React.FC = () => {
 };
 
 export default PesananSaya;
+  

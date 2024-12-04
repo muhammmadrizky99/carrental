@@ -8,6 +8,8 @@ import { uploadFile } from '../middleware/multerUpload';
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from '../controllers/UserController';
 import { deleteBooking, getApprovedBookingsForReturn, pengembalianMobil } from '../controllers/PengembalianController';
 import authMiddleware from '../middleware/authMiddleware';
+import { createPayment, deletePayment, getPaymentById, getPayments } from '../controllers/PembayaranController';
+import { createReview, getReviewsByBooking } from '../controllers/ReviewController';
 
 
 const router = express.Router();
@@ -26,7 +28,6 @@ router.get("/booking",authMiddleware, getBookings);
 router.post("/booking",authMiddleware, createBooking);
 router.put("/booking/:id",authMiddleware, updateBookingStatus);
 
-
 router.get('/mobil/tahun/:tahun',authMiddleware, mobil );
 router.get('/mobil/tipe',authMiddleware, tipeMobil);
 router.get('/mobil/:id',authMiddleware, idMobil);
@@ -41,5 +42,19 @@ router.delete("/users/:id",authMiddleware, deleteUser);
 router.post("/pengembalian", authMiddleware, pengembalianMobil);
 router.get("/pengembalian",authMiddleware, getApprovedBookingsForReturn);
 router.delete("/booking/:id",authMiddleware, deleteBooking);
+
+
+router.post("/pembayaran", uploadFile.single("buktiPembayaran"), createPayment);
+router.get("/pembayaran", getPayments);
+router.get("/pembayaran/:id", getPaymentById);
+router.delete("/pembayaran/:id", deletePayment);
+
+
+router.post("/review", createReview);
+router.get("/review/:bookingId", getReviewsByBooking);
+// router.get("/api/reviews", getAllReviews);
+
+
+
 
 export default router;

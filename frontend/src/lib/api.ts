@@ -11,5 +11,5 @@ async (config)=>{
     console.log(token);
     config.headers.Authorization = `Bearer ${token}`
     return config;
-}
-)
+});
+

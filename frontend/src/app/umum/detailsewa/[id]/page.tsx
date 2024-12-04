@@ -116,18 +116,7 @@ const DetailSewa: React.FC = () => {
         <div className="mt-6">
           <h2 className="text-xl font-bold mb-2">Form Booking</h2>
           <form onSubmit={handleBookingSubmit}>
-            <label className="block mb-2">
-              Nama Pemesan:
-              <input
-                type="text"
-                className="border p-2 w-full rounded-md"
-                value={bookingDetails.namaPemesan}
-                required
-                onChange={(e) =>
-                  setBookingDetails({ ...bookingDetails, namaPemesan: e.target.value })
-                }
-              />
-            </label>
+            
             <label className="block mb-2">
               Tanggal Booking:
               <input

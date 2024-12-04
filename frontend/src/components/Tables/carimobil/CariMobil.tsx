@@ -72,12 +72,10 @@ const CariMobil: React.FC = () => {
   useEffect(() => {
     const fetchTipeOptions = async () => {
       try {
-        const response = await fetch('http://localhost:2500/api/mobil/tipe');
-        if (!response.ok) {
-          throw new Error('Failed to fetch types');
-        }
-        const result = await response.json();
-        setTipeOptions(result.data || []); // Simpan daftar tipe di state
+        const response = await api.get('/api/mobil/tipe');
+        
+        const result = await response.data;
+        setTipeOptions(result.data || []); 
         console.log("tipeOptions");
 
 
@@ -138,9 +136,12 @@ const CariMobil: React.FC = () => {
 
   // Filter mobil berdasarkan filter yang diterapkan
   const filteredCars = cars.filter((car) => {
+    // const withinPriceRange =
+    //   car.harga >= filters.harga[0] &&
+    //   (filters.harga[1] === null || car.harga <= filters.harga[1]!);
     const withinPriceRange =
-      car.harga >= filters.harga[0] &&
-      (filters.harga[1] === null || car.harga <= filters.harga[1]!);
+        (filters.harga[0] === null || car.harga >= filters.harga[0]) &&
+        (filters.harga[1] === null || car.harga <= filters.harga[1]);
 
     const matchesTransmisi = filters.transmisi ? car.transmisi === filters.transmisi : true;
     const matchesNamaMobil = car.namaMobil.toLowerCase().includes(filters.namaMobil.toLowerCase());

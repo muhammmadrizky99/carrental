@@ -1,39 +1,39 @@
 "use client";
+import { api } from "@/lib/api";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const reviews = [
-  {
-    id: 1,
-    nama: "Danic Yery",
-    rating: 5,
-    komentar: "I really enjoyed driving this car. It's smooth and comfortable.",
-    balasan: null, // Tempat untuk menyimpan balasan admin
-  },
-  {
-    id: 1,
-    nama: "Azmi A nya apa?",
-    rating: 5,
-    komentar: "Yo sabana lamakkk naiak otonyoo daa!!!",
-    balasan: null, // Tempat untuk menyimpan balasan admin
-  },
-];
+// Definisikan tipe untuk Review
+interface Review {
+  id: number;
+  pengguna: {
+    nama: string;
+  };
+  rating: number;
+  komentar: string;
+  mobil: {
+    namaMobil: string;
+  };
+  tglBooking: string;
+}
 
 const ReviewCard = () => {
-  const [reviewList, setReviewList] = useState(reviews);
-  const [reply, setReply] = useState(""); // Menyimpan teks balasan saat ini
-  const [activeReviewId, setActiveReviewId] = useState(null); // Menyimpan ID review yang sedang dibalas
+  const [reviewList, setReviewList] = useState<Review[]>([]); // Menggunakan tipe Review[]
 
-  // Fungsi untuk mengirim balasan
-  const handleReplySubmit = (reviewId) => {
-    const updatedReviews = reviewList.map((review) =>
-      review.id === reviewId ? { ...review, balasan: reply } : review
-    );
-    setReviewList(updatedReviews);
-    setReply(""); // Kosongkan input balasan setelah dikirim
-    setActiveReviewId(null); // Tutup form balasan setelah dikirim
-  };
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await api.get("/api/reviews"); // Endpoint yang sesuai dengan controller Anda
+        const data: Review[] = await response.data;
+        setReviewList(data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
+  }, []);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -49,7 +49,7 @@ const ReviewCard = () => {
               </div>
               <div className="ml-3">
                 <h4 className="font-semibold text-black dark:text-white">
-                  {review.nama}
+                  {review.pengguna.nama}
                 </h4>
                 <div className="flex">
                   {[...Array(review.rating)].map((_, i) => (
@@ -60,49 +60,15 @@ const ReviewCard = () => {
                     />
                   ))}
                 </div>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Mobil: {review.mobil.namaMobil}
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Tanggal Booking: {new Date(review.tglBooking).toLocaleDateString()}
+                </p>
               </div>
             </div>
             <p className="text-gray-700 dark:text-gray-300">{review.komentar}</p>
-
-            {/* Tampilkan balasan jika ada */}
-            {review.balasan && (
-              <div className="mt-3 bg-gray-100 p-2 rounded">
-                <strong>Admin:</strong>
-                <p className="text-gray-700 dark:text-gray-300">{review.balasan}</p>
-              </div>
-            )}
-
-            {/* Form untuk membalas komentar */}
-            {activeReviewId === review.id ? (
-              <div className="mt-3">
-                <textarea
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none resize-none"
-                  rows="3" // Mengatur tinggi awal
-                  placeholder="Tulis balasan..."
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                />
-                <button
-                  onClick={() => handleReplySubmit(review.id)}
-                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                >
-                  Kirim
-                </button>
-                <button
-                  onClick={() => setActiveReviewId(null)}
-                  className="mt-2 ml-2 px-4 py-2 bg-gray-300 text-black rounded"
-                >
-                  Batal
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setActiveReviewId(review.id)}
-                className="mt-4 px-4 bg-blue-200 text-black rounded"
-              >
-                Balas
-              </button>
-            )}
           </div>
         ))}
       </div>

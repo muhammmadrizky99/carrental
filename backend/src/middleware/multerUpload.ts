@@ -5,7 +5,7 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let { type } = req.query;
         if (!type) {
-            type = "/uploads"; // Default subdirektori jika `type` tidak didefinisikan
+            type = "/uploads"; 
         }
         const uploadDir = './public' + type;
 

@@ -17,6 +17,8 @@ model users {
   status String @db.VarChar(100) @default("aktiv")
 
   booking booking[]
+
+  // review review[]
 }
 model mobil {
   id Int @id @default(autoincrement())
@@ -42,6 +44,8 @@ model mobil {
 
 
   booking booking[]
+
+  // review review[]
 }
 model booking {
   id          Int       @id @default(autoincrement())
@@ -56,6 +60,8 @@ model booking {
   mobil       mobil     @relation(fields: [mobilId], references: [id])
   
   pengembalian pengembalian?
+  pembayaran pembayaran[]
+  review review[]
 }
 
 model pengembalian {
@@ -66,3 +72,31 @@ model pengembalian {
   bookingId          Int @unique
   booking            booking  @relation(fields: [bookingId], references: [id])
 }
+
+model pembayaran {
+  id                Int       @id @default(autoincrement())
+  tglPembayaran     DateTime  @default(now())
+  jumlahPembayaran  Float
+  metodePembayaran  String    @db.VarChar(100) 
+  keterangan        String?   @db.Text
+  buktiPembayaran   String?   @db.VarChar(255) 
+  bookingId         Int       @unique         
+  booking           booking   @relation(fields: [bookingId], references: [id])
+}
+
+model review {
+    id         Int      @id @default(autoincrement())
+    bookingId  Int
+    rating     Int      
+    komentar   String   
+    createdAt  DateTime @default(now())
+  //    tglBooking DateTime @default(now())
+  // pengguna   users    @relation(fields: [userId], references: [id])
+  // userId     Int
+  // mobil      mobil    @relation(fields: [mobilId], references: [id])
+  // mobilId    Int
+    
+    booking    booking   @relation(fields: [bookingId], references: [id])
+}
+
+
