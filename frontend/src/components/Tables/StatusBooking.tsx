@@ -131,6 +131,7 @@ const StatusBooking: React.FC = () => {
                 <tr>
                   <th className="px-4 py-2">Mobil</th>
                   <th className="px-4 py-2">Nama</th>
+                  <th className="px-4 py-2">HP</th>
                   <th className="px-4 py-2">Tanggal Booking</th>
                   <th className="px-4 py-2">Tanggal Mulai</th>
                   <th className="px-4 py-2">Tanggal Selesai</th>
@@ -152,6 +153,7 @@ const StatusBooking: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-2">{booking.pengguna.nama}</td>
+                    <td className="px-4 py-2">{booking.noHp}</td>
                     <td className="px-4 py-2">
                       {new Date(booking.tglBooking).toLocaleDateString()}
                     </td>

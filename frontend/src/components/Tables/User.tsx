@@ -200,7 +200,7 @@ console.log(token);
 
       {/* Modal for Add/Edit User */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 overflow-y-auto">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-4xl mx-4 md:mx-auto max-h-screen overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-center">{editMode ? 'Edit User' : 'Tambah User'}</h2>
             <div className="grid grid-cols-1 gap-4">

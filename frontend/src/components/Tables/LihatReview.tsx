@@ -1,79 +1,191 @@
 "use client";
+
+import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, useEffect } from "react";
+import { faComment } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 
-// Definisikan tipe untuk Review
-interface Review {
-  id: number;
-  pengguna: {
-    nama: string;
-  };
-  rating: number;
-  komentar: string;
-  mobil: {
-    namaMobil: string;
-  };
-  tglBooking: string;
-}
+const LihatReview: React.FC = () => {
+    const [bookings, setBookings] = useState<any[]>([]);
+    const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
+    const [mobilList, setMobilList] = useState<any[]>([]);
+    const [selectedMobil, setSelectedMobil] = useState<string>(""); // Mobil filter
+    const [loading, setLoading] = useState<boolean>(true);
 
-const ReviewCard = () => {
-  const [reviewList, setReviewList] = useState<Review[]>([]); // Menggunakan tipe Review[]
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get("/api/booking");
+                const data = response.data.data;
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await api.get("/api/reviews"); // Endpoint yang sesuai dengan controller Anda
-        const data: Review[] = await response.data;
-        setReviewList(data);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      }
+                setBookings(data);
+                setFilteredBookings(data); // Initialize filtered bookings
+                // Extract unique mobil names
+                const uniqueMobil = Array.from(new Set(data.map((b: any) => b.mobil.namaMobil)));
+                setMobilList(uniqueMobil);
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Gagal",
+                    text: "Gagal mengambil data booking.",
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookings();
+    }, []);
+
+    const handleViewReviews = async (bookingId: number) => {
+        try {
+            const response = await api.get(`/api/review/${bookingId}`);
+            const reviews = response.data.reviews;
+
+            if (reviews.length === 0) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Tidak Ada Review",
+                    text: "Tidak ada review untuk booking ini.",
+                });
+            } else {
+                const reviewContent = reviews
+                    .map(
+                        (review: any) => `
+                        <div style="
+                            border: 1px solid #e5e5e5;
+                            border-radius: 8px;
+                            padding: 10px;
+                            margin-bottom: 10px;
+                            background-color: #f9f9f9;
+                        ">
+                            <p><strong>Rating:</strong> ${review.rating} ⭐</p>
+                            <p><strong>Komentar:</strong> ${review.komentar}</p>
+                        </div>
+                    `
+                    )
+                    .join("");
+
+                Swal.fire({
+                    icon: "info",
+                    title: "Review",
+                    html: `
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${reviewContent}
+                    </div>
+                `,
+                    confirmButtonText: "Tutup",
+                });
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: "Belum ada review.",
+            });
+        }
     };
 
-    fetchReviews();
-  }, []);
+    const handleFilter = (mobilName: string) => {
+        setSelectedMobil(mobilName);
+        if (mobilName === "") {
+            setFilteredBookings(bookings);
+        } else {
+            const filtered = bookings.filter((b) => b.mobil.namaMobil === mobilName);
+            setFilteredBookings(filtered);
+        }
+    };
 
-  return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-xxl mx-auto">
-        {reviewList.map((review) => (
-          <div
-            key={review.id}
-            className="bg-white rounded-lg shadow-md p-4 mb-4 dark:bg-boxdark dark:border-strokedark"
-          >
-            <div className="flex items-center mb-2">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200">
-                <span className="text-xl text-gray-600">👤</span>
-              </div>
-              <div className="ml-3">
-                <h4 className="font-semibold text-black dark:text-white">
-                  {review.pengguna.nama}
-                </h4>
-                <div className="flex">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <FontAwesomeIcon
-                      key={i}
-                      icon={faStar}
-                      className="text-yellow-500"
-                    />
-                  ))}
+    if (loading) {
+        Swal.fire({
+            title: "Loading",
+            text: "Mengambil data booking...",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+        return null; // Prevent rendering during loading
+    }
+    Swal.close(); // Close loading SweetAlert when done
+
+    return (
+        <div className="rounded-sm border p-6 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="container mx-auto p-4">
+                <div className="mb-4">
+                    <label htmlFor="mobilFilter" className="block mb-2 font-medium">
+                        Filter berdasarkan Mobil:
+                    </label>
+                    <select
+                        id="mobilFilter"
+                        className="border rounded-md px-4 py-2"
+                        value={selectedMobil}
+                        onChange={(e) => handleFilter(e.target.value)}
+                    >
+                        <option value="">Semua Mobil</option>
+                        {mobilList.map((mobil, index) => (
+                            <option key={index} value={mobil}>
+                                {mobil}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300">
-                  Mobil: {review.mobil.namaMobil}
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  Tanggal Booking: {new Date(review.tglBooking).toLocaleDateString()}
-                </p>
-              </div>
+
+                {filteredBookings.length === 0 ? (
+                    <p>Tidak ada data booking untuk filter yang dipilih.</p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full table-auto border-collapse">
+                            <thead className="bg-gray-100 text-left">
+                                <tr>
+                                    <th className="px-4 py-2">Mobil</th>
+                                    <th className="px-4 py-2">Nama Pengguna</th>
+                                    <th className="px-4 py-2">Tanggal Mulai</th>
+                                    <th className="px-4 py-2">Tanggal Selesai</th>
+                                    <th className="px-4 py-2">Status Pesanan</th>
+                                    <th className="px-4 py-2">Lihat Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredBookings.map((booking) => (
+                                    <tr key={booking.id} className="border-b">
+                                        <td className="px-4 py-2">{booking.mobil.namaMobil}</td>
+                                        <td className="px-4 py-2">{booking.pengguna?.nama || "User not found"}</td>
+                                        <td className="px-4 py-2">
+                                            {new Date(booking.tglMulai).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            {new Date(booking.tglSelesai).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            <span className="px-3 bg-blue-400 text-white rounded-md">
+                                                {booking.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            <button
+                                                className="px-3 py-1 text-white rounded-md bg-gray-400 flex items-center justify-center"
+                                                onClick={() => handleViewReviews(booking.id)}
+                                            >
+                                                <FontAwesomeIcon
+                                                    icon={faComment}
+                                                    className="mr-2"
+                                                    size="lg"
+                                                />
+                                                Lihat Review
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
-            <p className="text-gray-700 dark:text-gray-300">{review.komentar}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
-export default ReviewCard;
+export default LihatReview;

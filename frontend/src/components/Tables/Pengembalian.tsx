@@ -243,12 +243,12 @@ const Pengembalian: React.FC = () => {
               <h2 className="text-xl font-bold mb-4">Detail </h2>
               <p><strong>ID:</strong> {selectedBooking.id}</p>
               <p><strong>Nama Pengguna:</strong> {selectedBooking.pengguna.nama}</p>
+              <p><strong>Nomor HP:</strong> {selectedBooking.noHp}</p>
               <p><strong>Mobil:</strong> {selectedBooking.mobil.namaMobil}</p>
               <p><strong>Tanggal Booking:</strong> {new Date(selectedBooking.tglBooking).toLocaleDateString()}</p>
               <p><strong>Tanggal Mulai:</strong> {new Date(selectedBooking.tglMulai).toLocaleDateString()}</p>
               <p><strong>Tanggal Selesai:</strong> {new Date(selectedBooking.tglSelesai).toLocaleDateString()}</p>
-              {/* <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p> */}
-              {/* <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p> */}
+              
               {selectedBooking.pengembalian ? (
                 <>
                 <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p>

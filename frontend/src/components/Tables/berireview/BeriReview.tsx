@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComment, faStar } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 
 const BeriReview: React.FC = () => {
     const [bookings, setBookings] = useState<any[]>([]);
@@ -72,8 +73,14 @@ const BeriReview: React.FC = () => {
             setBookings(bookingResponse.data.data);
             setShowReviewModal(false);
             setSelectedBooking(null);
+
+            Swal.fire({
+                icon: "success",
+                title: "Yeayy",
+                text: "Berhasil memberikan review!",
+            });
     
-            alert("Review berhasil diberikan!");
+            // alert("Review berhasil diberikan!");
         } catch (err: any) {
             console.error("Error submitting review:", err.response?.data || err.message);
             alert("Gagal memberikan review: " + (err.response?.data?.message || "Data tidak valid."));
@@ -112,7 +119,7 @@ const BeriReview: React.FC = () => {
                                             {new Date(booking.tglSelesai).toLocaleDateString()}
                                         </td>
                                         <td className="px-4 py-2">
-                                            <span className="px-3 bg-gray-300 text-gray-700 rounded-md">
+                                            <span className="px-3 bg-blue-400 text-white rounded-md">
                                                 {booking.status}
                                             </span>
                                         </td>
