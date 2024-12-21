@@ -8,7 +8,7 @@ import { uploadFile } from '../middleware/multerUpload';
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from '../controllers/UserController';
 import { deleteBooking, getApprovedBookingsForReturn, pengembalianMobil } from '../controllers/PengembalianController';
 import authMiddleware from '../middleware/authMiddleware';
-import { createPayment, deletePayment, getPaymentById, getPayments } from '../controllers/PembayaranController';
+import { createPayment, deletePayment, getPaymentById, getPayments, updatePaymentKeterangan } from '../controllers/PembayaranController';
 import { createReview, getReviewsByBooking } from '../controllers/ReviewController';
 
 
@@ -27,6 +27,7 @@ router.put('/mobil/:id',authMiddleware, uploadFile.single('gambar'), editMobil);
 router.get("/booking",authMiddleware, getBookings);
 router.post("/booking",authMiddleware, createBooking);
 router.put("/booking/:id",authMiddleware, updateBookingStatus);
+// router.get("/my-bookings",authMiddleware, getMyBookings);
 
 router.get('/mobil/tahun/:tahun',authMiddleware, mobil );
 router.get('/mobil/tipe',authMiddleware, tipeMobil);
@@ -48,6 +49,7 @@ router.post("/pembayaran", uploadFile.single("buktiPembayaran"), createPayment);
 router.get("/pembayaran", getPayments);
 router.get("/pembayaran/:id", getPaymentById);
 router.delete("/pembayaran/:id", deletePayment);
+router.patch("/pembayaran/:id/keterangan", updatePaymentKeterangan);
 
 
 router.post("/review", createReview);

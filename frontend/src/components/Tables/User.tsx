@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import { SetStateAction, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,8 +9,8 @@ import 'tailwindcss/tailwind.css';
 import { api } from "@/lib/api";
 
 const TableUser = () => {
-const token = localStorage.getItem("token");
-console.log(token);
+  const token = localStorage.getItem("token");
+  console.log(token);
 
   const [users, setUsers] = useState<any[]>([]);
   const [newUser, setNewUser] = useState({
@@ -23,6 +23,8 @@ console.log(token);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false); 
+  const [selectedUser, setSelectedUser] = useState<any>(null); 
 
   // Fetch data from API
   const fetchUsers = async () => {
@@ -49,14 +51,14 @@ console.log(token);
   // Add new user
   const handleAddUser = async () => {
     try {
-      console.log("Data yang dikirim:", newUser); // Log the user data
+      console.log("Data yang dikirim:", newUser); 
       const response = await api.post("/api/users", newUser);
       toast.success("User berhasil ditambahkan");
-      fetchUsers();  // Refresh data
-      setModalOpen(false);  // Close modal
-      resetForm();  // Reset form
+      fetchUsers();  
+      setModalOpen(false);  
+      resetForm();  
     } catch (error: unknown) {
-      // Type assertion: casting the error to AxiosError
+     
       if (axios.isAxiosError(error)) {
         console.error("Error adding user:", error.response?.data || error.message);
       } else {
@@ -80,11 +82,11 @@ console.log(token);
       try {
         const response = await api.put(`/api/users/${users[editIndex].id}`, newUser);
         toast.success("User berhasil diperbarui");
-        fetchUsers();  // Refresh data
-        setModalOpen(false);  // Close modal
-        setEditMode(false);  // Reset edit mode
-        setEditIndex(null);  // Reset edit index
-        resetForm();  // Reset form
+        fetchUsers();  
+        setModalOpen(false); 
+        setEditMode(false);  
+        setEditIndex(null); 
+        resetForm(); 
       } catch (error) {
         console.error("Error updating user:", error);
         toast.error("Gagal memperbarui user");
@@ -97,18 +99,24 @@ console.log(token);
     try {
       await api.delete(`/api/users/${id}`);
       toast.success("User berhasil dihapus");
-      fetchUsers();  // Refresh data
+      fetchUsers();  
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Gagal menghapus user");
     }
   };
 
+  // Open detail modal
+  const handleViewDetail = (user: any) => {
+    setSelectedUser(user);  
+    setDetailModalOpen(true);  
+  };
+
   const resetForm = () => {
     setNewUser({
       nama: "",
       email: "",
-      password:"",
+      password: "",
       role: "pengguna",
       status: "aktif"
     });
@@ -135,9 +143,6 @@ console.log(token);
         <div className="col-span-2 flex items-center text-black px-2 -ml-5">
           <p className="font-medium">Email</p>
         </div>
-        {/* <div className="col-span-2 flex items-center text-black -ml-10">
-          <p className="font-medium">Status</p>
-        </div> */}
         <div className="col-span-1 flex items-center text-black -ml-11">
           <p className="font-medium">Role</p>
         </div>
@@ -163,11 +168,6 @@ console.log(token);
               {user.email}
             </p>
           </div>
-          {/* <div className="col-span-2 flex items-center -ml-8">
-            <p className="text-sm text-black dark:text-white">
-              {user.status}
-            </p>
-          </div> */}
           <div className="col-span-1 flex items-center -ml-8">
             <p className="text-sm text-black dark:text-white">
               {user.role}
@@ -189,7 +189,7 @@ console.log(token);
             </button>
 
             <button
-              onClick={() => {}}
+              onClick={() => handleViewDetail(user)} 
               className="px-2 py-1 bg-blue-400 text-white rounded"
             >
               <FontAwesomeIcon icon={faInfoCircle} />
@@ -267,6 +267,31 @@ console.log(token);
                 className="px-4 py-2 ml-4 bg-gray-300 text-black rounded"
               >
                 Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for View User Detail */}
+      {detailModalOpen && selectedUser && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 overflow-y-auto">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-4xl mx-4 md:mx-auto max-h-screen overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4 text-center">Detail User</h2>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <p><strong>Nama:</strong> {selectedUser.nama}</p>
+                <p><strong>Email:</strong> {selectedUser.email}</p>
+                <p><strong>Role:</strong> {selectedUser.role}</p>
+                <p><strong>Status:</strong> {selectedUser.status}</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setDetailModalOpen(false)} 
+                className="px-4 py-2 bg-gray-300 text-black rounded"
+              >
+                Tutup
               </button>
             </div>
           </div>

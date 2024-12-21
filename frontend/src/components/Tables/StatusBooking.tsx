@@ -7,11 +7,16 @@ import { api } from "@/lib/api";
 
 const StatusBooking: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
   const [showModal, setShowModal] = useState<boolean>(false); // Untuk modal
   const [selectedBooking, setSelectedBooking] = useState<any>(null); // Booking yang dipilih
+
+  // State untuk filter
+  const [carNameFilter, setCarNameFilter] = useState<string>("");
+  const [userNameFilter, setUserNameFilter] = useState<string>("");
 
   useEffect(() => {
     let isMounted = true; // Untuk menghindari memory leaks
@@ -36,6 +41,21 @@ const StatusBooking: React.FC = () => {
     };
   }, []);
 
+  // Efek untuk mengupdate filteredBookings ketika filter berubah
+  useEffect(() => {
+    const filtered = bookings.filter((booking) => {
+      const carMatch = booking.mobil.namaMobil
+        .toLowerCase()
+        .includes(carNameFilter.toLowerCase());
+      const userMatch = booking.pengguna.nama
+        .toLowerCase()
+        .includes(userNameFilter.toLowerCase());
+
+      return carMatch && userMatch;
+    });
+
+    setFilteredBookings(filtered);
+  }, [carNameFilter, userNameFilter, bookings]);
 
   const handlePendingClick = (booking: any) => {
     setSelectedBooking(booking);
@@ -114,15 +134,32 @@ const StatusBooking: React.FC = () => {
     });
   };
 
-
-
   if (loading) return <p>Loading booking data...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className="rounded-sm border p-6 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="container mx-auto p-4">
-        {bookings.length === 0 ? (
+        
+        {/* Filter Inputs */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Cari nama mobil"
+            className="px-3 py-2 border rounded-md mr-2"
+            value={carNameFilter}
+            onChange={(e) => setCarNameFilter(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Cari nama pengguna"
+            className="px-3 py-2 border rounded-md"
+            value={userNameFilter}
+            onChange={(e) => setUserNameFilter(e.target.value)}
+          />
+        </div>
+
+        {filteredBookings.length === 0 ? (
           <p>Tidak ada data booking.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -140,7 +177,7 @@ const StatusBooking: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <tr key={booking.id} className="border-b">
                     <td className="px-4 py-2">
                       <div className="flex items-center">
@@ -195,7 +232,6 @@ const StatusBooking: React.FC = () => {
                         </span>
                       )}
                     </td>
-
 
                     <td className="px-4 py-2">
                       Rp {booking.mobil.harga.toLocaleString()}

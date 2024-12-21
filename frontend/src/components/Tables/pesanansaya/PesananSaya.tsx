@@ -73,11 +73,11 @@ const PesananSaya: React.FC = () => {
       }
       await api.post(`/api/pembayaran`, formData);
 
-      // Refresh data bookings tanpa merubah data booking
+     
       const response = await api.get("/api/booking");
       setBookings(response.data.data);
 
-      // Set the selected booking's payment status to "Pembayaran Selesai"
+     
       setShowPaymentModal(false);
       setSelectedBooking(null);
 
@@ -120,7 +120,7 @@ const PesananSaya: React.FC = () => {
                       {new Date(booking.tglSelesai).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2">
-                      <span className="px-3 bg-gray-300 text-gray-700 rounded-md">
+                      <span className="px-3  bg-green-500 text-white rounded-md">
                         {booking.status}
                       </span>
                     </td>

@@ -5,23 +5,17 @@ import prisma from "../config/database";
 export const createPayment = async (req: Request, res: Response) => {
   try {
     const { bookingId, tglPembayaran, metodePembayaran, jumlahPembayaran, keterangan } = req.body;
-    const buktiPembayaran = req.file?.path; // File bukti pembayaran
+    const buktiPembayaran = req.file?.path;
 
-    // Validasi input
     if (!bookingId || !tglPembayaran || !metodePembayaran || !jumlahPembayaran || !buktiPembayaran) {
       return res.status(400).json({ message: "Semua field wajib diisi!" });
     }
 
-    // Periksa apakah booking ada
-    const booking = await prisma.booking.findUnique({
-      where: { id: Number(bookingId) },
-    });
-
+    const booking = await prisma.booking.findUnique({ where: { id: Number(bookingId) } });
     if (!booking) {
       return res.status(404).json({ message: "Booking tidak ditemukan!" });
     }
 
-    // Buat pembayaran
     const payment = await prisma.pembayaran.create({
       data: {
         bookingId: Number(bookingId),
@@ -33,7 +27,6 @@ export const createPayment = async (req: Request, res: Response) => {
       },
     });
 
-    // Tidak ada perubahan status booking
     return res.status(201).json({
       message: "Pembayaran berhasil ditambahkan.",
       data: payment,
@@ -61,6 +54,39 @@ export const getPayments = async (_req: Request, res: Response) => {
     return res.status(200).json({ data: payments });
   } catch (error) {
     console.error("Gagal mengambil data pembayaran:", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+
+// Mengupdate keterangan pembayaran
+export const updatePaymentKeterangan = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { keterangan } = req.body;
+
+    if (!keterangan) {
+      return res.status(400).json({ message: "Keterangan wajib diisi." });
+    }
+
+    const payment = await prisma.pembayaran.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: "Pembayaran tidak ditemukan." });
+    }
+
+    const updatedPayment = await prisma.pembayaran.update({
+      where: { id: Number(id) },
+      data: { keterangan },
+    });
+
+    return res.status(200).json({
+      message: "Keterangan berhasil diperbarui.",
+      data: updatedPayment,
+    });
+  } catch (error) {
+    console.error("Gagal memperbarui keterangan:", error);
     return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 };

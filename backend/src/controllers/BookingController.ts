@@ -119,3 +119,32 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
   }
 };
 
+// interface CustomRequest extends Request {
+//   user?: { id: number; email: string; role: string };
+// }
+
+// // GET: Fetch "Pesanan Saya" untuk pengguna yang sedang login
+// export const getMyBookings = async (req: CustomRequest, res: Response): Promise<Response> => { // Tipe pengembalian Response
+//   try {
+//     const penggunaId = req.user?.id; // Mendapatkan ID pengguna dari middleware autentikasi
+
+//     if (!penggunaId) {
+//       return res.status(401).json({ success: false, message: "Pengguna belum terautentikasi." });
+//     }
+
+//     const bookings = await prisma.booking.findMany({
+//       where: {
+//         penggunaId: penggunaId, // Menampilkan hanya booking milik pengguna yang sedang login
+//       },
+//       include: { 
+//         mobil: true,  
+//         pengguna: true,  
+//         pengembalian: true
+//       },
+//     });
+
+//     return res.status(200).json({ success: true, data: bookings }); // Pastikan mengembalikan Response
+//   } catch (error) {
+//     return res.status(500).json({ success: false, message: (error as Error).message });
+//   }
+// };

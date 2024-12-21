@@ -20,6 +20,10 @@ const Pengembalian: React.FC = () => {
 
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false); // Modal Detail
 
+  // State untuk filter
+  const [mobilFilter, setMobilFilter] = useState<string>("");
+  const [penggunaFilter, setPenggunaFilter] = useState<string>("");
+
   // Fetch data booking ketika komponen pertama kali di-render
   useEffect(() => {
     let isMounted = true;
@@ -49,6 +53,23 @@ const Pengembalian: React.FC = () => {
       isMounted = false;
     };
   }, []);
+
+  // Fungsi untuk menangani filter mobil
+  const handleMobilFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMobilFilter(e.target.value);
+  };
+
+  // Fungsi untuk menangani filter pengguna
+  const handlePenggunaFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPenggunaFilter(e.target.value);
+  };
+
+  // Filter berdasarkan mobil dan pengguna
+  const filteredBookings = bookings.filter((booking) => {
+    const mobilMatches = booking.mobil.namaMobil.toLowerCase().includes(mobilFilter.toLowerCase());
+    const penggunaMatches = booking.pengguna.nama.toLowerCase().includes(penggunaFilter.toLowerCase());
+    return mobilMatches && penggunaMatches;
+  });
 
   const handleKembalikanClick = (booking: any) => {
     setSelectedBooking(booking);
@@ -122,8 +143,6 @@ const Pengembalian: React.FC = () => {
     }
   };
 
-
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -131,7 +150,26 @@ const Pengembalian: React.FC = () => {
     <div className="rounded-sm border p-6 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Data Pengembalian</h1>
-        {bookings.length === 0 ? (
+
+        {/* Filter Form */}
+        <div className="mb-4 flex space-x-4">
+          <input
+            type="text"
+            placeholder="Filter berdasarkan mobil"
+            value={mobilFilter}
+            onChange={handleMobilFilterChange}
+            className="px-4 py-2 border rounded"
+          />
+          <input
+            type="text"
+            placeholder="Filter berdasarkan pengguna"
+            value={penggunaFilter}
+            onChange={handlePenggunaFilterChange}
+            className="px-4 py-2 border rounded"
+          />
+        </div>
+
+        {filteredBookings.length === 0 ? (
           <p>Tidak ada booking yang disetujui untuk pengembalian.</p>
         ) : (
           <table className="table-auto w-full border-collapse border border-gray-200">
@@ -147,7 +185,7 @@ const Pengembalian: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <tr key={booking.id}>
                   <td className="border px-4 py-2">{booking.mobil.namaMobil}</td>
                   <td className="border px-4 py-2">{booking.pengguna.nama}</td>
@@ -192,8 +230,7 @@ const Pengembalian: React.FC = () => {
                       onClick={() => handleReturnCar(booking)}
                       className="bg-red-500 text-white px-4 py-1  rounded-md mb-1"
                     >
-                   
-                      <FontAwesomeIcon icon={faTrash} />
+                    <FontAwesomeIcon icon={faTrash} />
                     </button>
                     </div>
                   </td>
@@ -239,33 +276,26 @@ const Pengembalian: React.FC = () => {
 
         {showDetailModal && selectedBooking && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-md shadow-md max-w-md w-full">
-              <h2 className="text-xl font-bold mb-4">Detail </h2>
-              <p><strong>ID:</strong> {selectedBooking.id}</p>
-              <p><strong>Nama Pengguna:</strong> {selectedBooking.pengguna.nama}</p>
-              <p><strong>Nomor HP:</strong> {selectedBooking.noHp}</p>
+            <div className="bg-white p-6 rounded-md shadow-md max-w-lg w-full">
+              <h2 className="text-xl font-bold mb-4">Detail Booking</h2>
               <p><strong>Mobil:</strong> {selectedBooking.mobil.namaMobil}</p>
+              <p><strong>Nama Pengguna:</strong> {selectedBooking.pengguna.nama}</p>
               <p><strong>Tanggal Booking:</strong> {new Date(selectedBooking.tglBooking).toLocaleDateString()}</p>
               <p><strong>Tanggal Mulai:</strong> {new Date(selectedBooking.tglMulai).toLocaleDateString()}</p>
               <p><strong>Tanggal Selesai:</strong> {new Date(selectedBooking.tglSelesai).toLocaleDateString()}</p>
-              
-              {selectedBooking.pengembalian ? (
-                <>
-                <p><strong>Kondisi:</strong> {selectedBooking.pengembalian.kondisiMobil}</p>
-                <p><strong>Status Pengembalian:</strong> {selectedBooking.pengembalian.statusPengembalian}</p>
-                </>
-              ) : (
-                <p><strong>Status Pengembalian:</strong> Belum dikembalikan</p>
-              )}
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
-              >
-                Tutup
-              </button>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
           </div>
         )}
+
+        <ToastContainer />
       </div>
     </div>
   );

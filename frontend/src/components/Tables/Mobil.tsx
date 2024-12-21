@@ -23,6 +23,8 @@ const TableTwo = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [ac, setAc] = useState({ ac: true });
 
+  const [filterNamaMobil, setFilterNamaMobil] = useState("");
+  const [filterTipeMobil, setFilterTipeMobil] = useState("");
 
 
 
@@ -179,7 +181,7 @@ const TableTwo = () => {
     try {
       const response = await api.delete(`/api/mobil/${id}`);
       console.log(response);
-      
+
       toast.success("Item berhasil dihapus"); // Menampilkan pesan dari server
       closeToast();
       fetchData();
@@ -236,6 +238,7 @@ const TableTwo = () => {
   };
 
 
+
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState(null);
 
@@ -244,26 +247,62 @@ const TableTwo = () => {
   }, []);
 
 
+  const filteredData = data.filter((product) => {
+    return (
+      product.namaMobil.toLowerCase().includes(filterNamaMobil.toLowerCase()) &&
+      product.tipe.toLowerCase().includes(filterTipeMobil.toLowerCase())
+    );
+  });
+
+
+
+
 
   return (
     <div className="rounded-sm border p-6 border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="py-6">
-        {/* <h4 className="text-xl font-semibold text-black dark:text-white">
-          Data Mobil
-        </h4> */}
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col w-1/3">
+            <label htmlFor="filterNamaMobil" className="font-medium text-black dark:text-white">
+              Nama Mobil
+            </label>
+            <input
+              type="text"
+              id="filterNamaMobil"
+              value={filterNamaMobil}
+              onChange={(e) => setFilterNamaMobil(e.target.value)}
+              placeholder="Filter berdasarkan nama mobil"
+              className="px-3 py-2 border rounded w-full"
+            />
+          </div>
+
+          <div className="flex flex-col w-1/3">
+            <label htmlFor="filterTipeMobil" className="font-medium text-black dark:text-white">
+              Tipe Mobil
+            </label>
+            <input
+              type="text"
+              id="filterTipeMobil"
+              value={filterTipeMobil}
+              onChange={(e) => setFilterTipeMobil(e.target.value)}
+              placeholder="Filter berdasarkan tipe mobil"
+              className="px-3 py-2 border rounded w-full"
+            />
+          </div>
+
           <button
             onClick={() => {
               setEditMode(false);
               resetForm();
               setModalOpen(true);
             }}
-            className="px-3 py-1 bg-primary text-white rounded"
+            className="px-4 py-2 bg-primary text-white rounded w-32"
           >
             + Tambah Mobil
           </button>
         </div>
       </div>
+
 
       <div className="grid grid-cols-6 px-4 py-4.5 bg-gray sm:grid-cols-8 md:px-6 2xl:px-7.5">
         <div className="col-span-2 flex items-center text-black ">
@@ -289,7 +328,7 @@ const TableTwo = () => {
         </div>
       </div>
 
-      {data.map((product, key) => (
+      {filteredData.map((product, key) => (
         <div
           className="grid grid-cols-6 border-t border-stroke px-4 py-4.5 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5"
           key={key}
@@ -392,7 +431,7 @@ const TableTwo = () => {
               </button>
             </div>
             <h2 className="text-xl font-semibold mb-4 mt-8 text-center">
-            {EditMode ? "Edit Mobil" : "Tambah Mobil"}
+              {EditMode ? "Edit Mobil" : "Tambah Mobil"}
             </h2>
 
             <div className="mb-4">

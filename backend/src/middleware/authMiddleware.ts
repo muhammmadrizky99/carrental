@@ -11,7 +11,7 @@ const authMiddleware = (req: any, res: Response, next: NextFunction) => {
   try {
     const secretKey = "sdhfkhskhfkj-wejtrhwejt-ertj";
     const decoded = jwt.verify(token, secretKey) as { id: number; email: string; role: string };
-    req.user = decoded; // Properti `user` sekarang ada
+    req.user = decoded; 
     next();
   } catch (error) {
     return res.status(403).json({ message: "Invalid token" });
