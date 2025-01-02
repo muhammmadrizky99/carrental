@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -105,14 +105,13 @@ const StatusBooking: React.FC = () => {
   const handleDeleteBooking = async (id: number) => {
     try {
       const response = await api.delete(`/api/booking/${id}`);
-      Swal.fire("","Data booking berhasil dihapus.","success");
+      Swal.fire("", "Data booking berhasil dihapus.", "success");
 
       setBookings((prevBookings) =>
-      prevBookings.filter((booking) => booking.id !== id)
-    );
-         
-    }catch (error) {
-      Swal.fire("","Gagal menghapus data booking.","error");
+        prevBookings.filter((booking) => booking.id !== id)
+      );
+    } catch (error) {
+      Swal.fire("", "Gagal menghapus data booking. Silahkan hapus data lainnya terkait booking ini terlebih dahulu.", "error");
       console.error(error);
     }
   };
@@ -211,14 +210,14 @@ const StatusBooking: React.FC = () => {
                       ) : (
                         <span
                           onClick={() =>
-                            booking.status === "rejected" && handleDeleteConfirmation(booking.id)
+                            booking.status === "selesai" && handleDeleteConfirmation(booking.id)
                           }
-                          className={`inline-block px-3 cursor-pointer rounded-md  ${booking.status === "approved"
+                          className={`inline-block px-3 cursor-pointer rounded-md ${booking.status === "approved"
                             ? "bg-green-500 text-white"
                             : booking.status === "rejected"
                               ? "bg-red-500 text-white"
                               : booking.status === "selesai"
-                                ? "bg-blue-500 text-white"
+                                ? "bg-blue-500 text-white cursor-pointer"
                                 : ""
                             }`}
                         >

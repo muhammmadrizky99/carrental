@@ -146,6 +146,9 @@ const TableUser = () => {
         <div className="col-span-1 flex items-center text-black -ml-11">
           <p className="font-medium">Role</p>
         </div>
+        <div className="col-span-1 flex items-center text-black -ml-11">
+          <p className="font-medium">Status</p>
+        </div>
         <div className="col-span-1 flex items-center text-black px-2">
           <p className="font-medium">Aksi</p>
         </div>
@@ -171,6 +174,11 @@ const TableUser = () => {
           <div className="col-span-1 flex items-center -ml-8">
             <p className="text-sm text-black dark:text-white">
               {user.role}
+            </p>
+          </div>
+          <div className="col-span-1 flex items-center -ml-8">
+            <p className="text-sm text-black dark:text-white">
+              {user.status}
             </p>
           </div>
           <div className="col-span-1 flex items-center space-x-2 ml-4">

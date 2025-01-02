@@ -53,7 +53,7 @@ const LihatReview: React.FC = () => {
             } else {
                 const reviewContent = reviews
                     .map(
-                        (review: any) => `
+                        (review: any) => ` 
                         <div style="
                             border: 1px solid #e5e5e5;
                             border-radius: 8px;
@@ -95,6 +95,43 @@ const LihatReview: React.FC = () => {
         } else {
             const filtered = bookings.filter((b) => b.mobil.namaMobil === mobilName);
             setFilteredBookings(filtered);
+        }
+    };
+
+    const handleDeleteBooking = async (bookingId: number) => {
+        try {
+            // Show confirmation alert before deleting
+            const result = await Swal.fire({
+                title: "Yakin ingin menghapus?",
+                text: "Data ini akan dihapus secara permanen.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Hapus",
+                cancelButtonText: "Batal",
+            });
+
+            if (result.isConfirmed) {
+                // Make API call to delete the booking
+                await api.delete(`/api/booking/${bookingId}`);
+                // Refresh bookings after deletion
+                setBookings((prevBookings) =>
+                    prevBookings.filter((booking) => booking.id !== bookingId)
+                );
+                setFilteredBookings((prevFilteredBookings) =>
+                    prevFilteredBookings.filter((booking) => booking.id !== bookingId)
+                );
+                Swal.fire({
+                    icon: "success",
+                    title: "Berhasil",
+                    text: "Booking berhasil dihapus.",
+                });
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: "Gagal menghapus booking. Silahkan hapus data lainnya terkait booking ini terlebih dahulu.",
+            });
         }
     };
 
@@ -146,6 +183,7 @@ const LihatReview: React.FC = () => {
                                     <th className="px-4 py-2">Tanggal Selesai</th>
                                     <th className="px-4 py-2">Status Pesanan</th>
                                     <th className="px-4 py-2">Lihat Review</th>
+                                    <th className="px-4 py-2">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,6 +214,16 @@ const LihatReview: React.FC = () => {
                                                 />
                                                 Lihat Review
                                             </button>
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            {booking.status === "selesai" && (
+                                                <button
+                                                    className="px-3 py-1 text-white rounded-md bg-red-500"
+                                                    onClick={() => handleDeleteBooking(booking.id)}
+                                                >
+                                                    Hapus
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

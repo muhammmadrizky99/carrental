@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import Swal from "sweetalert2"; // Pastikan SweetAlert2 diinstal
 
 const LaporanPembayaran: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);
@@ -43,19 +44,45 @@ const LaporanPembayaran: React.FC = () => {
 
   const saveKeterangan = async (id: number, keterangan: string) => {
     try {
-      console.log("Mengirim ke endpoint:", `/api/pembayaran/${id}/keterangan`);
-      console.log("Payload:", { keterangan });
       const response = await api.patch(`/api/pembayaran/${id}/keterangan`, { keterangan });
-      console.log("Respons:", response.data);
       setPayments((prev) =>
         prev.map((payment) =>
           payment.id === id ? { ...payment, keterangan: response.data.data.keterangan } : payment
         )
       );
+      setFilteredPayments((prev) =>
+        prev.map((payment) =>
+          payment.id === id ? { ...payment, keterangan: response.data.data.keterangan } : payment
+        )
+      );
+      
       setEditingData(null);
     } catch (error: any) {
       console.error("Error:", error.response?.data || error.message);
       alert("Gagal menyimpan keterangan. Periksa koneksi atau konfigurasi API.");
+    }
+  };
+
+  const deletePayment = async (id: number) => {
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "Data pembayaran ini akan dihapus!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await api.delete(`/api/pembayaran/${id}`);
+        setPayments((prev) => prev.filter((payment) => payment.id !== id));
+        setFilteredPayments((prev) => prev.filter((payment) => payment.id !== id));
+        Swal.fire("Terhapus!", "Pembayaran telah dihapus.", "success");
+      } catch (error: any) {
+        console.error("Error menghapus pembayaran:", error.response?.data || error.message);
+        Swal.fire("Gagal!", "Gagal menghapus pembayaran. Periksa koneksi atau konfigurasi API.", "error");
+      }
     }
   };
 
@@ -84,32 +111,53 @@ const LaporanPembayaran: React.FC = () => {
   const downloadPDF = async () => {
     const element = document.getElementById("laporan-pembayaran");
     if (!element) return;
-
+  
+    const deleteButtons = document.querySelectorAll('.delete-button');
     const editButtons = document.querySelectorAll('.edit-button');
+    
+
+    deleteButtons.forEach((button) => {
+      (button as HTMLElement).style.display = 'none';
+    });
     editButtons.forEach((button) => {
       (button as HTMLElement).style.display = 'none';
     });
+  
 
+    const aksiColumn = document.querySelectorAll('th:nth-child(8), td:nth-child(8)');
+    aksiColumn.forEach((col) => {
+      (col as HTMLElement).style.display = 'none';
+    });
+  
     const canvas = await html2canvas(element);
     const imgData = canvas.toDataURL("image/png");
-
+  
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
-
+  
     pdf.setFont("Helvetica", "bold");
     pdf.setFontSize(18);
     pdf.text("Laporan Pembayaran", pageWidth / 2, 20, { align: "center" });
-
+  
     const marginTop = 30;
     const pageHeight = (canvas.height * (pageWidth - 20)) / canvas.width;
     pdf.addImage(imgData, "PNG", 10, marginTop, pageWidth - 20, pageHeight);
-
+  
     pdf.save("laporan_pembayaran.pdf");
-
+  
+ 
+    deleteButtons.forEach((button) => {
+      (button as HTMLElement).style.display = '';
+    });
     editButtons.forEach((button) => {
       (button as HTMLElement).style.display = '';
     });
+    aksiColumn.forEach((col) => {
+      (col as HTMLElement).style.display = '';
+    });
   };
+  
+  
 
   if (loading) return <p>Loading laporan pembayaran...</p>;
   if (error) return <p>{error}</p>;
@@ -120,17 +168,6 @@ const LaporanPembayaran: React.FC = () => {
 
       {/* Filter Form */}
       <div className="mb-4">
-        {/* <label className="mr-2">Filter berdasarkan:</label>
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="mr-4 p-2 border rounded"
-        >
-          <option value="tanggal">Tanggal</option>
-          <option value="bulan">Bulan</option>
-          <option value="tahun">Tahun</option>
-        </select> */}
-
         <input
           type="date"
           value={startDate}
@@ -169,6 +206,7 @@ const LaporanPembayaran: React.FC = () => {
               <th className="border border-gray-300 px-4 py-2">Metode</th>
               <th className="border border-gray-300 px-4 py-2">Nominal</th>
               <th className="border border-gray-300 px-4 py-2">Keterangan</th>
+              <th className="border border-gray-300 px-4 py-2">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -221,6 +259,14 @@ const LaporanPembayaran: React.FC = () => {
                       </button>
                     </div>
                   )}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <button
+                    className="delete-button px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    onClick={() => deletePayment(payment.id)}
+                  >
+                    Hapus
+                  </button>
                 </td>
               </tr>
             ))}
