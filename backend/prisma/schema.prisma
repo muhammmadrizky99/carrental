@@ -100,3 +100,15 @@ model review {
 }
 
 
+model bengkel {
+  id             Int     @id @default(autoincrement())
+  kodeTransaksi  String  @db.VarChar(255)
+  namaPelanggan  String  @unique @db.VarChar(255)  
+  jenisPelanggan String  @db.VarChar(255)
+  tarifService   Decimal @default(0.0)
+  diskon         Decimal @default(0.0)
+  total          Decimal @default(0.0)
+}
+
+
+

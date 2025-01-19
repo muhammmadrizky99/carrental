@@ -52,6 +52,12 @@ const menuGroups:menuProps[] = [
       },
       {
         access:"admin",
+        icon: faCarSide,
+        label: "Bengkel",
+        route: "/bengkel",
+      },
+      {
+        access:"admin",
         icon: faSquareCheck,
         label: "Status Booking",
         route: "/statusbooking",

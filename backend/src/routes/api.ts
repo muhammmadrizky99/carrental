@@ -3,6 +3,7 @@ import express from 'express';
 import { LoginController } from '../controllers/AuthController';
 import { RegisterController } from '../controllers/RegisterController';
 import { deleteMobil, editMobil, idMobil, mobil, MobilController, semuaMobil, tipeMobil } from '../controllers/MobilController';
+import { deleteBengkel, editBengkel,  BengkelController, semuaBengkel } from '../controllers/BengkelController';
 import { createBooking, getBookings, updateBookingStatus } from '../controllers/BookingController';
 import { uploadFile } from '../middleware/multerUpload';
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from '../controllers/UserController';
@@ -23,6 +24,11 @@ router.post('/mobil',authMiddleware, uploadFile.single('gambar'), MobilControlle
 router.get('/mobil',authMiddleware, semuaMobil);
 router.delete('/mobil/:id',authMiddleware, deleteMobil);
 router.put('/mobil/:id',authMiddleware, uploadFile.single('gambar'), editMobil);
+
+router.post('/bengkel', BengkelController);
+router.get('/bengkel', semuaBengkel);
+router.delete('/bengkel/:id', deleteBengkel);
+router.put('/bengkel/:id', editBengkel);
 
 router.get("/booking",authMiddleware, getBookings);
 router.post("/booking",authMiddleware, createBooking);
